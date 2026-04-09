@@ -1,17 +1,17 @@
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\BrixoApplication.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\config\DataInitializer.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\config\SecurityConfig.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\controller\AuthController.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\controller\HomeController.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\controller\ServicioController.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\controller\UsuarioController.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\model\EstadoServicio.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\model\Rol.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\model\Servicio.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\model\Usuario.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\repository\RolRepository.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\repository\ServicioRepository.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\repository\UsuarioRepository.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\service\CustomUserDetailsService.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\service\ServicioService.java
-C:\Proyecto Java\Brixo420\src\main\java\com\BRIXO\service\UsuarioService.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\BrixoApplication.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\config\DataInitializer.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\config\SecurityConfig.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\controller\AuthController.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\controller\HomeController.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\controller\ServicioController.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\controller\UsuarioController.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\model\EstadoServicio.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\model\Rol.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\model\Servicio.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\model\Usuario.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\repository\RolRepository.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\repository\ServicioRepository.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\repository\UsuarioRepository.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\service\CustomUserDetailsService.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\service\ServicioService.java
+C:\Proyecto-Java\Brixo-01\src\main\java\com\BRIXO\service\UsuarioService.java
