@@ -174,23 +174,23 @@
         </div>
 
         <div class="field">
-            <label for="telefono">Teléfono <span style="font-weight:400;color:var(--muted);font-size:.8rem">(opcional)</span></label>
-            <input id="telefono" th:field="*{telefono}" type="tel" maxlength="20" placeholder="+52 55 1234 5678">
-            <div class="val-msg" id="telefonoMsg">Formato de teléfono inválido</div>
+            <label for="telefono">Teléfono</label>
+            <input id="telefono" th:field="*{telefono}" type="tel" required maxlength="10" placeholder="Ej: 5512345678">
+            <div class="val-msg" id="telefonoMsg">Debe tener exactamente 10 dígitos numéricos</div>
             <div th:if="${#fields.hasErrors('telefono')}" class="field-error" th:errors="*{telefono}"></div>
         </div>
 
         <div class="field">
             <label for="ciudad">Ciudad <span style="font-weight:400;color:var(--muted);font-size:.8rem">(opcional)</span></label>
             <input id="ciudad" th:field="*{ciudad}" type="text" maxlength="100" placeholder="Ej: Ciudad de México">
-            <div class="val-msg" id="ciudadMsg">La ciudad no puede superar 100 caracteres</div>
+            <div class="val-msg" id="ciudadMsg">La ciudad debe tener entre 2 y 100 caracteres</div>
             <div th:if="${#fields.hasErrors('ciudad')}" class="field-error" th:errors="*{ciudad}"></div>
         </div>
 
         <div class="field">
             <label for="direccion">Dirección <span style="font-weight:400;color:var(--muted);font-size:.8rem">(opcional)</span></label>
             <input id="direccion" th:field="*{direccion}" type="text" maxlength="200" placeholder="Ej: Calle Principal 123, Col. Centro">
-            <div class="val-msg" id="direccionMsg">La dirección no puede superar 200 caracteres</div>
+            <div class="val-msg" id="direccionMsg">La dirección debe tener entre 2 y 200 caracteres</div>
             <div th:if="${#fields.hasErrors('direccion')}" class="field-error" th:errors="*{direccion}"></div>
         </div>
 
@@ -217,9 +217,9 @@
     const rules = {
         nombre:    { test: v => v.length >= 3 && v.length <= 100, msgId: 'nombreMsg' },
         email:     { test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), msgId: 'emailMsg' },
-        telefono:  { test: v => v === '' || /^[+]?[0-9\s\-()]{7,20}$/.test(v), msgId: 'telefonoMsg', optional: true },
-        ciudad:    { test: v => v === '' || v.length <= 100, msgId: 'ciudadMsg', optional: true },
-        direccion: { test: v => v === '' || v.length <= 200, msgId: 'direccionMsg', optional: true },
+        telefono:  { test: v => /^[0-9]{10}$/.test(v), msgId: 'telefonoMsg' },
+        ciudad:    { test: v => v === '' || (v.length >= 2 && v.length <= 100), msgId: 'ciudadMsg', optional: true },
+        direccion: { test: v => v === '' || (v.length >= 2 && v.length <= 200), msgId: 'direccionMsg', optional: true },
         password:  { test: v => v.length >= 6, msgId: 'passwordMsg' }
     };
 

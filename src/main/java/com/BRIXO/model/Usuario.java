@@ -37,16 +37,17 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 120)
     private String email;
 
-    @Size(max = 20, message = "El teléfono no puede superar 20 caracteres")
-    @Pattern(regexp = "^$|^[+]?[0-9\\s\\-()]{7,20}$", message = "Teléfono inválido")
-    @Column(length = 20)
+    @NotBlank(message = "El teléfono es obligatorio")
+    @Size(min = 10, max = 10, message = "El teléfono debe tener 10 dígitos")
+    @Pattern(regexp = "^[0-9]{10}$", message = "El teléfono debe tener exactamente 10 dígitos numéricos")
+    @Column(nullable = false, length = 10)
     private String telefono;
 
-    @Size(max = 200, message = "La dirección no puede superar 200 caracteres")
+    @Size(min = 2, max = 200, message = "La dirección debe tener entre 2 y 200 caracteres")
     @Column(length = 200)
     private String direccion;
 
-    @Size(max = 100, message = "La ciudad no puede superar 100 caracteres")
+    @Size(min = 2, max = 100, message = "La ciudad debe tener entre 2 y 100 caracteres")
     @Column(length = 100)
     private String ciudad;
 

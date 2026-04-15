@@ -111,22 +111,22 @@
                     </div>
 
                     <div class="field">
-                        <label for="telefono"><i class="fas fa-phone"></i> Teléfono</label>
-                        <input id="telefono" name="telefono" type="tel" th:value="${usuario.telefono}" maxlength="20" placeholder="+52 55 1234 5678">
-                        <div class="hint">Opcional</div>
-                        <div class="err" id="telefonoError">Formato de teléfono inválido</div>
+                        <label for="telefono"><i class="fas fa-phone"></i> Teléfono <span class="req">*</span></label>
+                        <input id="telefono" name="telefono" type="tel" th:value="${usuario.telefono}" required maxlength="10" placeholder="Ej: 5512345678">
+                        <div class="hint">10 dígitos numéricos</div>
+                        <div class="err" id="telefonoError">Debe tener exactamente 10 dígitos numéricos</div>
                     </div>
 
                     <div class="field">
                         <label for="ciudad"><i class="fas fa-city"></i> Ciudad</label>
                         <input id="ciudad" name="ciudad" type="text" th:value="${usuario.ciudad}" maxlength="100" placeholder="Ej: Ciudad de México">
-                        <div class="err" id="ciudadError">La ciudad no puede superar 100 caracteres</div>
+                        <div class="err" id="ciudadError">La ciudad debe tener entre 2 y 100 caracteres</div>
                     </div>
 
                     <div class="field" style="grid-column:1/-1">
                         <label for="direccion"><i class="fas fa-map-marker-alt"></i> Dirección</label>
                         <input id="direccion" name="direccion" type="text" th:value="${usuario.direccion}" maxlength="200" placeholder="Ej: Calle Principal 123, Col. Centro">
-                        <div class="err" id="direccionError">La dirección no puede superar 200 caracteres</div>
+                        <div class="err" id="direccionError">La dirección debe tener entre 2 y 200 caracteres</div>
                     </div>
 
                     <div class="field">
@@ -222,9 +222,9 @@
     const rules = {
         nombre:    { test: v => v.length >= 3 && v.length <= 100, msgId: 'nombreError' },
         email:     { test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), msgId: 'emailError' },
-        telefono:  { test: v => v === '' || /^[+]?[0-9\s\-()]{7,20}$/.test(v), msgId: 'telefonoError', optional: true },
-        ciudad:    { test: v => v === '' || v.length <= 100, msgId: 'ciudadError', optional: true },
-        direccion: { test: v => v === '' || v.length <= 200, msgId: 'direccionError', optional: true },
+        telefono:  { test: v => /^[0-9]{10}$/.test(v), msgId: 'telefonoError' },
+        ciudad:    { test: v => v === '' || (v.length >= 2 && v.length <= 100), msgId: 'ciudadError', optional: true },
+        direccion: { test: v => v === '' || (v.length >= 2 && v.length <= 200), msgId: 'direccionError', optional: true },
         password:  { test: v => v === '' || v.length >= 6, msgId: 'passwordError', optional: true }
     };
 
