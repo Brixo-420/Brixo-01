@@ -9,6 +9,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/design-system.css}">
     <link rel="stylesheet" th:href="@{/css/brixo.css}">
+    <style>
+        .form-control:invalid {
+            border-color: #dc3545;
+        }
+        .form-control:valid {
+            border-color: #28a745;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+    </style>
 </head>
 <body style="padding-top:70px;background:#f8fafc">
 <div th:replace="~{fragments/navbar :: navbar(overlay=false)}"></div>
@@ -18,50 +35,153 @@
 
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <form th:action="${servicio.id == null} ? @{/servicios} : @{/servicios/{id}(id=${servicio.id})}"
+    <form id="servicioForm" novalidate
+          th:action="${servicio.id == null} ? @{/servicios} : @{/servicios/{id}(id=${servicio.id})}"
           th:object="${servicio}" method="post" class="card card-body shadow-sm">
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label" for="tipo">Tipo de Servicio</label>
-                <input id="tipo" type="text" th:field="*{tipo}" class="form-control" placeholder="Ej: Plomería, Carpintería...">
+                <label class="form-label" for="tipo">Tipo de Servicio <span class="text-danger">*</span></label>
+                <select id="tipo" name="tipo" th:field="*{tipo}" class="form-select" required>
+                    <option value="">Selecciona un tipo de servicio</option>
+                    <option th:each="t : ${T(com.BRIXO.model.TipoServicio).values()}" 
+                            th:value="${t}" th:text="${t.displayName}"></option>
+                </select>
+                <div class="error-message" id="tipoError">Por favor selecciona un tipo de servicio</div>
                 <div class="text-danger small" th:if="${#fields.hasErrors('tipo')}" th:errors="*{tipo}"></div>
             </div>
+            
             <div class="col-md-6">
-                <label class="form-label" for="titulo">Titulo</label>
-                <input id="titulo" type="text" th:field="*{titulo}" class="form-control">
+                <label class="form-label" for="titulo">Titulo <span class="text-danger">*</span></label>
+                <input id="titulo" type="text" th:field="*{titulo}" class="form-control" 
+                       required minlength="3" maxlength="120" 
+                       placeholder="Ej: Reparar tubería de cocina">
+                <small class="text-muted">Mínimo 3 caracteres, máximo 120</small>
+                <div class="error-message" id="tituloError">El título es requerido y debe tener entre 3 y 120 caracteres</div>
                 <div class="text-danger small" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></div>
             </div>
+            
             <div class="col-md-6">
-                <label class="form-label" for="ubicacion">Ubicacion</label>
-                <input id="ubicacion" type="text" th:field="*{ubicacion}" class="form-control">
+                <label class="form-label" for="ubicacion">Ubicación <span class="text-danger">*</span></label>
+                <input id="ubicacion" type="text" th:field="*{ubicacion}" class="form-control" 
+                       required minlength="3" maxlength="120" 
+                       placeholder="Ej: Calle Principal 123, Apartamento 5B">
+                <small class="text-muted">Mínimo 3 caracteres, máximo 120</small>
+                <div class="error-message" id="ubicacionError">La ubicación es requerida y debe tener entre 3 y 120 caracteres</div>
                 <div class="text-danger small" th:if="${#fields.hasErrors('ubicacion')}" th:errors="*{ubicacion}"></div>
             </div>
+            
             <div class="col-md-6">
-                <label class="form-label" for="presupuesto">Presupuesto</label>
-                <input id="presupuesto" type="number" min="0" step="0.01" th:field="*{presupuesto}" class="form-control">
+                <label class="form-label" for="presupuesto">Presupuesto <span class="text-danger">*</span></label>
+                <input id="presupuesto" type="number" th:field="*{presupuesto}" class="form-control" 
+                       required min="0.01" step="0.01" placeholder="Ej: 150.50">
+                <small class="text-muted">Debe ser mayor a 0</small>
+                <div class="error-message" id="presupuestoError">El presupuesto es requerido y debe ser mayor a 0</div>
                 <div class="text-danger small" th:if="${#fields.hasErrors('presupuesto')}" th:errors="*{presupuesto}"></div>
             </div>
+            
             <div class="col-md-6">
-                <label class="form-label" for="estado">Estado</label>
-                <select id="estado" th:field="*{estado}" class="form-select">
+                <label class="form-label" for="estado">Estado <span class="text-danger">*</span></label>
+                <select id="estado" th:field="*{estado}" class="form-select" required>
+                    <option value="">Selecciona un estado</option>
                     <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"></option>
                 </select>
+                <div class="error-message" id="estadoError">El estado es requerido</div>
                 <div class="text-danger small" th:if="${#fields.hasErrors('estado')}" th:errors="*{estado}"></div>
             </div>
+            
             <div class="col-12">
-                <label class="form-label" for="descripcion">Descripcion</label>
-                <textarea id="descripcion" th:field="*{descripcion}" class="form-control" rows="4"></textarea>
+                <label class="form-label" for="descripcion">Descripción <span class="text-danger">*</span></label>
+                <textarea id="descripcion" th:field="*{descripcion}" class="form-control" 
+                          required minlength="10" maxlength="500" rows="4"
+                          placeholder="Describe en detalle el servicio que necesitas..."></textarea>
+                <small class="text-muted">Mínimo 10 caracteres, máximo 500</small>
+                <div class="error-message" id="descripcionError">La descripción es requerida y debe tener entre 10 y 500 caracteres</div>
                 <div class="text-danger small" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></div>
             </div>
         </div>
 
         <div class="mt-4 d-flex gap-2">
             <button type="submit" class="btn btn-dark">Guardar</button>
+            <button type="reset" class="btn btn-outline-secondary">Limpiar</button>
             <a th:href="@{/servicios}" class="btn btn-outline-secondary">Cancelar</a>
         </div>
     </form>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Validación con Bootstrap nativa
+    (function() {
+        'use strict';
+        const form = document.getElementById('servicioForm');
+        
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    showErrorMessages();
+                }
+                form.classList.add('was-validated');
+            }, false);
+
+            // Validación en tiempo real
+            const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
+            inputs.forEach(input => {
+                input.addEventListener('blur', validateField);
+                input.addEventListener('input', validateField);
+                input.addEventListener('change', validateField);
+            });
+        }
+
+        function validateField(e) {
+            const field = e.target;
+            const errorElement = document.getElementById(field.id + 'Error');
+            
+            if (!field.checkValidity()) {
+                field.classList.add('is-invalid');
+                field.classList.remove('is-valid');
+                if (errorElement) {
+                    errorElement.classList.add('show');
+                }
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+                if (errorElement) {
+                    errorElement.classList.remove('show');
+                }
+            }
+        }
+
+        function showErrorMessages() {
+            const form = document.getElementById('servicioForm');
+            const fields = form.querySelectorAll('input[required], textarea[required], select[required]');
+            
+            fields.forEach(field => {
+                if (!field.checkValidity()) {
+                    const errorElement = document.getElementById(field.id + 'Error');
+                    if (errorElement) {
+                        errorElement.classList.add('show');
+                    }
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+        }
+
+        // Mostrar tipos disponibles al click en select
+        const tipoSelect = document.getElementById('tipo');
+        if (tipoSelect) {
+            tipoSelect.addEventListener('click', function() {
+                console.log('Tipos de servicios disponibles:');
+                Array.from(this.options).forEach(opt => {
+                    if (opt.value) console.log('- ' + opt.text);
+                });
+            });
+        }
+    })();
+</script>
 <div th:replace="~{fragments/navbar :: navbarJs}"></div>
 </body>
 </html>

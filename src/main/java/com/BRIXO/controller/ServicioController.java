@@ -2,6 +2,7 @@ package com.BRIXO.controller;
 
 import com.BRIXO.model.EstadoServicio;
 import com.BRIXO.model.Servicio;
+import com.BRIXO.model.TipoServicio;
 import com.BRIXO.service.ServicioService;
 import jakarta.validation.Valid;
 import org.apache.poi.ss.usermodel.Cell;
@@ -32,6 +33,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Arrays;
 
 @Controller
 @RequestMapping("/servicios")
@@ -123,7 +125,11 @@ public class ServicioController {
 
         Servicio servicio = new Servicio();
         if (tipo != null && !tipo.isBlank()) {
-            servicio.setTipo(tipo);
+            try {
+                servicio.setTipo(TipoServicio.valueOf(tipo.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Type not valid, skip setting
+            }
         }
         
         model.addAttribute("servicio", servicio);
@@ -332,6 +338,21 @@ public class ServicioController {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/servicios";
+    }
+
+    @GetMapping("/api/tipos")
+    @ResponseBody
+    public ResponseEntity<List<java.util.Map<String, String>>> getTipos() {
+        return ResponseEntity.ok(
+            Arrays.stream(TipoServicio.values())
+                .map(tipo -> {
+                    java.util.Map<String, String> map = new java.util.HashMap<>();
+                    map.put("value", tipo.name());
+                    map.put("label", tipo.getDisplayName());
+                    return map;
+                })
+                .toList()
+        );
     }
 
     private boolean puedeEditar(Authentication authentication) {

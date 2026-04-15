@@ -9,6 +9,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/design-system.css}">
     <link rel="stylesheet" th:href="@{/css/brixo.css}">
+    <style>
+        .form-control:invalid, .form-select:invalid {
+            border-color: #dc3545;
+        }
+        .form-control:valid, .form-select:valid {
+            border-color: #28a745;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+        .password-strength {
+            height: 5px;
+            margin-top: 0.5rem;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        .password-strength.weak {
+            background-color: #dc3545;
+        }
+        .password-strength.fair {
+            background-color: #ffc107;
+        }
+        .password-strength.good {
+            background-color: #28a745;
+        }
+    </style>
 </head>
 <body style="padding-top:70px;background:#f8fafc">
 <div th:replace="~{fragments/navbar :: navbar(overlay=false)}"></div>
@@ -18,48 +50,173 @@
 
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <form th:action="${usuario.id == null} ? @{/admin/usuarios} : @{/admin/usuarios/{id}(id=${usuario.id})}"
+    <form id="usuarioForm" novalidate
+          th:action="${usuario.id == null} ? @{/admin/usuarios} : @{/admin/usuarios/{id}(id=${usuario.id})}"
           th:object="${usuario}" method="post" class="card card-body shadow-sm">
 
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label" for="nombre">Nombre</label>
-                <input id="nombre" type="text" th:field="*{nombre}" class="form-control">
+                <label class="form-label" for="nombre">Nombre <span class="text-danger">*</span></label>
+                <input id="nombre" type="text" th:field="*{nombre}" class="form-control" 
+                       required minlength="3" maxlength="100"
+                       placeholder="Ej: Juan Pérez">
+                <small class="text-muted">Mínimo 3 caracteres, máximo 100</small>
+                <div class="error-message" id="nombreError">El nombre es requerido y debe tener entre 3 y 100 caracteres</div>
                 <div class="text-danger small" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
             </div>
 
             <div class="col-md-6">
-                <label class="form-label" for="email">Correo</label>
-                <input id="email" type="email" th:field="*{email}" class="form-control">
+                <label class="form-label" for="email">Correo <span class="text-danger">*</span></label>
+                <input id="email" type="email" th:field="*{email}" class="form-control" 
+                       required maxlength="120"
+                       placeholder="Ej: juan@example.com">
+                <small class="text-muted">Debe ser un correo válido</small>
+                <div class="error-message" id="emailError">El correo es requerido y debe ser válido</div>
                 <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
             </div>
 
             <div class="col-md-6">
-                <label class="form-label" for="password">Contraseña</label>
-                <input id="password" type="password" th:field="*{password}" class="form-control"
-                       th:attr="placeholder=${usuario.id == null} ? '' : 'Dejar en blanco para no cambiar'">
+                <label class="form-label" for="password">
+                    Contraseña <span class="text-danger" th:if="${usuario.id == null}">*</span>
+                </label>
+                <input id="password" type="password" th:field="*{password}" class="form-control" 
+                       th:required="${usuario.id == null}"
+                       minlength="6" maxlength="120"
+                       th:attr="placeholder=${usuario.id == null} ? 'Mínimo 6 caracteres' : 'Dejar en blanco para no cambiar'">
+                <small class="text-muted" th:if="${usuario.id == null}">Mínimo 6 caracteres, incluye mayúsculas, minúsculas y números</small>
+                <small class="text-muted" th:if="${usuario.id != null}">Déjalo en blanco si no quieres cambiarla</small>
+                <div class="password-strength" id="passwordStrength"></div>
+                <div class="error-message" id="passwordError">La contraseña es requerida y debe tener mínimo 6 caracteres</div>
                 <div class="text-danger small" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
             </div>
 
             <div class="col-md-6">
-                <label class="form-label" for="rolId">Rol</label>
+                <label class="form-label" for="rolId">Rol <span class="text-danger">*</span></label>
                 <select id="rolId" name="rolId" class="form-select" required>
-                    <option value="">Seleccione un rol</option>
+                    <option value="">Selecciona un rol</option>
                     <option th:each="rol : ${roles}"
                             th:value="${rol.id}"
                             th:selected="${usuario.rol != null and usuario.rol.id == rol.id}"
                             th:text="${rol.nombre}"></option>
                 </select>
+                <div class="error-message" id="rolIdError">El rol es requerido</div>
+                <div class="text-danger small" th:if="${usuario.rol == null && usuario.id != null}">Debe seleccionar un rol</div>
             </div>
         </div>
 
         <div class="mt-4 d-flex gap-2">
             <button type="submit" class="btn btn-dark">Guardar</button>
+            <button type="reset" class="btn btn-outline-secondary">Limpiar</button>
             <a th:href="@{/admin/usuarios}" class="btn btn-outline-secondary">Cancelar</a>
         </div>
     </form>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Validación con Bootstrap nativa
+    (function() {
+        'use strict';
+        const form = document.getElementById('usuarioForm');
+        
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    showErrorMessages();
+                }
+                form.classList.add('was-validated');
+            }, false);
+
+            // Validación en tiempo real
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('blur', validateField);
+                input.addEventListener('input', validateField);
+                input.addEventListener('change', validateField);
+            });
+
+            // Validación de fortaleza de contraseña
+            const passwordInput = document.getElementById('password');
+            if (passwordInput) {
+                passwordInput.addEventListener('input', checkPasswordStrength);
+            }
+        }
+
+        function validateField(e) {
+            const field = e.target;
+            const errorElement = document.getElementById(field.id + 'Error');
+            
+            if (field.getAttribute('required') === null && field.value === '') {
+                field.classList.remove('is-invalid', 'is-valid');
+                if (errorElement) {
+                    errorElement.classList.remove('show');
+                }
+                return;
+            }
+
+            if (!field.checkValidity()) {
+                field.classList.add('is-invalid');
+                field.classList.remove('is-valid');
+                if (errorElement) {
+                    errorElement.classList.add('show');
+                }
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+                if (errorElement) {
+                    errorElement.classList.remove('show');
+                }
+            }
+        }
+
+        function checkPasswordStrength(e) {
+            const password = e.target.value;
+            const strengthBar = document.getElementById('passwordStrength');
+            
+            if (!password) {
+                strengthBar.classList.remove('weak', 'fair', 'good');
+                return;
+            }
+
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+            strengthBar.classList.remove('weak', 'fair', 'good');
+            if (strength <= 2) {
+                strengthBar.classList.add('weak');
+            } else if (strength <= 3) {
+                strengthBar.classList.add('fair');
+            } else {
+                strengthBar.classList.add('good');
+            }
+        }
+
+        function showErrorMessages() {
+            const form = document.getElementById('usuarioForm');
+            const fields = form.querySelectorAll('input, select');
+            
+            fields.forEach(field => {
+                if (field.getAttribute('required') !== null) {
+                    if (!field.checkValidity()) {
+                        const errorElement = document.getElementById(field.id + 'Error');
+                        if (errorElement) {
+                            errorElement.classList.add('show');
+                        }
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                }
+            });
+        }
+    })();
+</script>
 <div th:replace="~{fragments/navbar :: navbarJs}"></div>
 </body>
 </html>

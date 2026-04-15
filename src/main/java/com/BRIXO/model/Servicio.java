@@ -44,9 +44,10 @@ public class Servicio {
     @Column(nullable = false, length = 500)
     private String descripcion;
 
-    @Size(max = 50, message = "El tipo no puede superar 50 caracteres")
-    @Column(length = 50)
-    private String tipo;
+    @NotNull(message = "El tipo de servicio es obligatorio")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private TipoServicio tipo;
 
     @NotBlank(message = "La ubicacion es obligatoria")
     @Size(max = 120, message = "La ubicacion no puede superar 120 caracteres")
