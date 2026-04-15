@@ -186,7 +186,39 @@
     function validateField(e) {
         const f = e.target;
         const err = document.getElementById(f.id + 'Error');
-        if (f.getAttribute('required') === null && !f.value) {
+        const v = f.value.trim();
+
+        // Campo teléfono: validación custom
+        if (f.id === 'telefono') {
+            if (v === '') {
+                f.classList.remove('is-invalid', 'is-valid');
+                if (err) err.classList.remove('show');
+                return;
+            }
+            const ok = /^[+]?[0-9\s\-()]{7,20}$/.test(v);
+            f.classList.toggle('is-invalid', !ok);
+            f.classList.toggle('is-valid', ok);
+            if (err) err.classList.toggle('show', !ok);
+            return;
+        }
+
+        // Campo email: validación custom más estricta
+        if (f.id === 'email') {
+            if (v === '') {
+                f.classList.add('is-invalid');
+                f.classList.remove('is-valid');
+                if (err) err.classList.add('show');
+                return;
+            }
+            const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+            f.classList.toggle('is-invalid', !ok);
+            f.classList.toggle('is-valid', ok);
+            if (err) err.classList.toggle('show', !ok);
+            return;
+        }
+
+        // Campos opcionales vacíos
+        if (f.getAttribute('required') === null && !v) {
             f.classList.remove('is-invalid', 'is-valid');
             if (err) err.classList.remove('show');
             return;

@@ -2,6 +2,7 @@ package com.BRIXO.service;
 
 import com.BRIXO.model.Usuario;
 import com.BRIXO.repository.UsuarioRepository;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,13 +14,20 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
+    private final LoginAttemptService loginAttemptService;
 
-    public CustomUserDetailsService(UsuarioRepository usuarioRepository) {
+    public CustomUserDetailsService(UsuarioRepository usuarioRepository, LoginAttemptService loginAttemptService) {
         this.usuarioRepository = usuarioRepository;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        if (loginAttemptService.isBlocked(username)) {
+            int mins = loginAttemptService.getLockMinutesRemaining(username);
+            throw new LockedException("Cuenta bloqueada por demasiados intentos. Intenta en " + mins + " minutos.");
+        }
+
         Usuario usuario = usuarioRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 

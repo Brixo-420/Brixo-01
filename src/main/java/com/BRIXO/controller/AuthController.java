@@ -1,8 +1,12 @@
 package com.BRIXO.controller;
 
 import com.BRIXO.model.Usuario;
+import com.BRIXO.service.LoginAttemptService;
 import com.BRIXO.service.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.security.web.WebAttributes;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,13 +19,24 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AuthController {
 
     private final UsuarioService usuarioService;
+    private final LoginAttemptService loginAttemptService;
 
-    public AuthController(UsuarioService usuarioService) {
+    public AuthController(UsuarioService usuarioService, LoginAttemptService loginAttemptService) {
         this.usuarioService = usuarioService;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login(HttpServletRequest request, Model model) {
+        // Extraer mensaje de error de Spring Security
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            Object ex = session.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+            if (ex instanceof org.springframework.security.authentication.LockedException locked) {
+                model.addAttribute("bloqueado", true);
+                model.addAttribute("mensajeBloqueo", locked.getMessage());
+            }
+        }
         return "login";
     }
 

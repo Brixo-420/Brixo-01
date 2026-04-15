@@ -35,12 +35,12 @@ public class Servicio {
     private Long id;
 
     @NotBlank(message = "El titulo es obligatorio")
-    @Size(max = 120, message = "El titulo no puede superar 120 caracteres")
+    @Size(min = 3, max = 120, message = "El titulo debe tener entre 3 y 120 caracteres")
     @Column(nullable = false, length = 120)
     private String titulo;
 
     @NotBlank(message = "La descripcion es obligatoria")
-    @Size(max = 500, message = "La descripcion no puede superar 500 caracteres")
+    @Size(min = 10, max = 500, message = "La descripcion debe tener entre 10 y 500 caracteres")
     @Column(nullable = false, length = 500)
     private String descripcion;
 
@@ -50,7 +50,7 @@ public class Servicio {
     private TipoServicio tipo;
 
     @NotBlank(message = "La ubicacion es obligatoria")
-    @Size(max = 120, message = "La ubicacion no puede superar 120 caracteres")
+    @Size(min = 3, max = 120, message = "La ubicacion debe tener entre 3 y 120 caracteres")
     @Column(nullable = false, length = 120)
     private String ubicacion;
 
