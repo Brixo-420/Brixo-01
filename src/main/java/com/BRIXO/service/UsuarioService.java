@@ -92,6 +92,15 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
+    @Transactional
+    public void eliminarPerfil(String email, String passwordConfirmacion) {
+        Usuario usuario = buscarPorEmail(email);
+        if (!passwordEncoder.matches(passwordConfirmacion, usuario.getPassword())) {
+            throw new IllegalArgumentException("La contraseña es incorrecta");
+        }
+        usuarioRepository.delete(usuario);
+    }
+
     public Usuario buscarPorEmail(String email) {
         return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));

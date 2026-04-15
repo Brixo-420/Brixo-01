@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 @Controller
 @RequestMapping("/perfil")
 public class PerfilController {
@@ -60,5 +63,24 @@ public class PerfilController {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/perfil";
+    }
+
+    @PostMapping("/eliminar")
+    public String eliminarPerfil(
+            @RequestParam String passwordConfirm,
+            Authentication authentication,
+            HttpServletRequest request,
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            usuarioService.eliminarPerfil(authentication.getName(), passwordConfirm);
+            SecurityContextHolder.clearContext();
+            request.getSession().invalidate();
+            return "redirect:/login?eliminado";
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/perfil";
+        }
     }
 }
