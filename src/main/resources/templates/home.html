@@ -228,40 +228,12 @@
         </div>
     </section>
 
-    <!-- TRUST STRIP -->
-    <section style="padding:48px 0 0">
-        <div class="container" style="max-width:1200px">
-            <div class="trust-strip">
-                <div class="trust-item">
-                    <div class="trust-item__icon" style="background:#E3F2FD;color:#1565C0"><i class="fas fa-user-check"></i></div>
-                    <div class="trust-item__number">500+</div>
-                    <div class="trust-item__label">Profesionales verificados</div>
-                </div>
-                <div class="trust-item">
-                    <div class="trust-item__icon" style="background:#E8F5E9;color:#2E7D32"><i class="fas fa-star"></i></div>
-                    <div class="trust-item__number">4.8</div>
-                    <div class="trust-item__label">Calificación promedio</div>
-                </div>
-                <div class="trust-item">
-                    <div class="trust-item__icon" style="background:#FFF3E0;color:#E65100"><i class="fas fa-tools"></i></div>
-                    <div class="trust-item__number">100+</div>
-                    <div class="trust-item__label">Tipos de servicio</div>
-                </div>
-                <div class="trust-item">
-                    <div class="trust-item__icon" style="background:#F3E5F5;color:#7B1FA2"><i class="fas fa-shield-alt"></i></div>
-                    <div class="trust-item__number">100%</div>
-                    <div class="trust-item__label">Garantía de calidad</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- MAP EDITORIAL BLOCK REMOVED -->
 
     <!-- SERVICIOS GRID -->
     <section style="padding:0 0 64px">
         <div class="container" style="max-width:1200px">
-            <h2 class="section-heading">Servicios populares</h2>
+            <h2 class="section-heading">Servicios que puedes contratar</h2>
             <p class="section-subheading">Todo lo que tu hogar o proyecto necesita, resuelto por expertos.</p>
             <div class="cat-grid">
                 <a th:href="@{/servicios/nuevo(tipo='Obra')}" class="cat-pill cat-pill--obra">
@@ -283,10 +255,6 @@
                 <a th:href="@{/servicios/nuevo(tipo='Pintura')}" class="cat-pill cat-pill--pintura">
                     <div class="cat-pill__icon"><i class="fas fa-paint-roller"></i></div>
                     <span class="cat-pill__label">Pintura</span>
-                </a>
-                <a th:href="@{/servicios/nuevo(tipo='Otros')}" class="cat-pill cat-pill--otros">
-                    <div class="cat-pill__icon"><i class="fas fa-ellipsis-h"></i></div>
-                    <span class="cat-pill__label">Otros</span>
                 </a>
             </div>
         </div>
@@ -344,6 +312,36 @@
                         <span>Mantenimiento y emergencias</span>
                     </div>
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SOBRE NOSOTROS -->
+    <section style="padding:64px 0">
+        <div class="container" style="max-width:1200px">
+            <h2 class="section-heading">Sobre nosotros</h2>
+            <p class="section-subheading mb-5">Estamos comprometidos con conectar profesionales confiables con quienes buscan servicios de calidad.</p>
+            <div class="trust-strip">
+                <div class="trust-item">
+                    <div class="trust-item__icon" style="background:#E3F2FD;color:#1565C0"><i class="fas fa-user-check"></i></div>
+                    <div class="trust-item__number">500+</div>
+                    <div class="trust-item__label">Profesionales verificados</div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-item__icon" style="background:#E8F5E9;color:#2E7D32"><i class="fas fa-star"></i></div>
+                    <div class="trust-item__number">4.8</div>
+                    <div class="trust-item__label">Calificación promedio</div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-item__icon" style="background:#FFF3E0;color:#E65100"><i class="fas fa-tools"></i></div>
+                    <div class="trust-item__number">100+</div>
+                    <div class="trust-item__label">Tipos de servicio</div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-item__icon" style="background:#F3E5F5;color:#7B1FA2"><i class="fas fa-shield-alt"></i></div>
+                    <div class="trust-item__number">100%</div>
+                    <div class="trust-item__label">Garantía de calidad</div>
+                </div>
             </div>
         </div>
     </section>
