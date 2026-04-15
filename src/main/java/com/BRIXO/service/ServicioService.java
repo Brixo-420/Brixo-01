@@ -27,7 +27,7 @@ public class ServicioService {
         this.notificacionService = notificacionService;
     }
 
-    public List<Servicio> listarFiltrados(String titulo, String estado, String emailCliente, String usuarioActualEmail, boolean esAdmin, boolean esCliente) {
+    public List<Servicio> listarFiltrados(String titulo, String estado, String emailCliente, String usuarioActualEmail, boolean esAdmin, boolean esCliente, boolean esContratista) {
         Specification<Servicio> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -43,8 +43,16 @@ public class ServicioService {
                 predicates.add(cb.like(cb.lower(root.get("cliente").get("email")), "%" + emailCliente.toLowerCase() + "%"));
             }
 
+            // CLIENTE: solo sus propios servicios
             if (esCliente && !esAdmin) {
                 predicates.add(cb.equal(root.get("cliente").get("email"), usuarioActualEmail));
+            }
+
+            // CONTRATISTA: servicios abiertos/en_cotizacion + asignados a él (cualquier estado)
+            if (esContratista && !esAdmin) {
+                Predicate abiertos = root.get("estado").in(EstadoServicio.ABIERTO, EstadoServicio.EN_COTIZACION);
+                Predicate asignados = cb.equal(root.get("contratistaAsignado").get("email"), usuarioActualEmail);
+                predicates.add(cb.or(abiertos, asignados));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

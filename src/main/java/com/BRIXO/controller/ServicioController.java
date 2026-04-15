@@ -62,7 +62,7 @@ public class ServicioController {
         boolean esCliente = tieneRol(authentication, "ROLE_CLIENTE");
         boolean esContratista = tieneRol(authentication, "ROLE_CONTRATISTA");
 
-        model.addAttribute("servicios", servicioService.listarFiltrados(titulo, estado, emailCliente, authentication.getName(), esAdmin, esCliente));
+        model.addAttribute("servicios", servicioService.listarFiltrados(titulo, estado, emailCliente, authentication.getName(), esAdmin, esCliente, esContratista));
         model.addAttribute("estados", EstadoServicio.values());
         model.addAttribute("titulo", titulo);
         model.addAttribute("estado", estado);
