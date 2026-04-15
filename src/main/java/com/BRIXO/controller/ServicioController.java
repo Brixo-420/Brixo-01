@@ -110,13 +110,23 @@ public class ServicioController {
         }
 
     @GetMapping("/nuevo")
-    public String nuevo(Authentication authentication, Model model, RedirectAttributes redirectAttributes) {
+    public String nuevo(
+            @RequestParam(required = false) String tipo,
+            Authentication authentication, 
+            Model model, 
+            RedirectAttributes redirectAttributes
+    ) {
         if (!puedeEditar(authentication)) {
             redirectAttributes.addFlashAttribute("error", "Solo CLIENTE o ADMIN pueden crear servicios");
             return "redirect:/servicios";
         }
 
-        model.addAttribute("servicio", new Servicio());
+        Servicio servicio = new Servicio();
+        if (tipo != null && !tipo.isBlank()) {
+            servicio.setTitulo(tipo);
+        }
+        
+        model.addAttribute("servicio", servicio);
         model.addAttribute("estados", EstadoServicio.values());
         return "servicios/form";
     }

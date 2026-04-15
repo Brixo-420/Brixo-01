@@ -256,27 +256,7 @@
         </div>
     </section>
 
-    <!-- MAP EDITORIAL BLOCK -->
-    <section style="padding:64px 0">
-        <div class="container" style="max-width:1200px">
-            <div class="editorial-block editorial-block--map" style="background:var(--accent-sand)">
-                <div class="editorial-block__text">
-                    <h2 style="color:var(--neutral-900)">Encuentra profesionales<br>cerca de ti</h2>
-                    <p style="color:var(--text-secondary)">Explora y encuentra contratistas verificados, sus reseñas y precios estimados — todo para tu proyecto.</p>
-                    <div>
-                        <a th:href="@{/servicios}" class="btn-brixo btn-brixo--dark">
-                            <i class="fas fa-map-marked-alt"></i> Ver profesionales
-                        </a>
-                    </div>
-                </div>
-                <div class="editorial-block__image" style="min-height:260px">
-                    <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png"
-                         alt="Mapa de profesionales"
-                         style="width:320px;height:320px;object-fit:contain;padding:24px">
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- MAP EDITORIAL BLOCK REMOVED -->
 
     <!-- SERVICIOS GRID -->
     <section style="padding:0 0 64px">
@@ -284,27 +264,27 @@
             <h2 class="section-heading">Servicios populares</h2>
             <p class="section-subheading">Todo lo que tu hogar o proyecto necesita, resuelto por expertos.</p>
             <div class="cat-grid">
-                <a th:href="@{/servicios}" class="cat-pill cat-pill--obra">
+                <a th:href="@{/servicios/nuevo(tipo='Obra')}" class="cat-pill cat-pill--obra">
                     <div class="cat-pill__icon"><i class="fas fa-hard-hat"></i></div>
                     <span class="cat-pill__label">Obra</span>
                 </a>
-                <a th:href="@{/servicios}" class="cat-pill cat-pill--carpinteria">
+                <a th:href="@{/servicios/nuevo(tipo='Carpintería')}" class="cat-pill cat-pill--carpinteria">
                     <div class="cat-pill__icon"><i class="fas fa-hammer"></i></div>
                     <span class="cat-pill__label">Carpintería</span>
                 </a>
-                <a th:href="@{/servicios}" class="cat-pill cat-pill--plomeria">
+                <a th:href="@{/servicios/nuevo(tipo='Plomería')}" class="cat-pill cat-pill--plomeria">
                     <div class="cat-pill__icon"><i class="fas fa-wrench"></i></div>
                     <span class="cat-pill__label">Plomería</span>
                 </a>
-                <a th:href="@{/servicios}" class="cat-pill cat-pill--electricidad">
+                <a th:href="@{/servicios/nuevo(tipo='Electricidad')}" class="cat-pill cat-pill--electricidad">
                     <div class="cat-pill__icon"><i class="fas fa-bolt"></i></div>
                     <span class="cat-pill__label">Electricidad</span>
                 </a>
-                <a th:href="@{/servicios}" class="cat-pill cat-pill--pintura">
+                <a th:href="@{/servicios/nuevo(tipo='Pintura')}" class="cat-pill cat-pill--pintura">
                     <div class="cat-pill__icon"><i class="fas fa-paint-roller"></i></div>
                     <span class="cat-pill__label">Pintura</span>
                 </a>
-                <a th:href="@{/servicios}" class="cat-pill cat-pill--otros">
+                <a th:href="@{/servicios/nuevo(tipo='Otros')}" class="cat-pill cat-pill--otros">
                     <div class="cat-pill__icon"><i class="fas fa-ellipsis-h"></i></div>
                     <span class="cat-pill__label">Otros</span>
                 </a>
