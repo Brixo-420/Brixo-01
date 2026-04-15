@@ -24,6 +24,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
         String nombreRol = usuario.getRol() != null ? usuario.getRol().getNombre() : "CLIENTE";
+        String rolNormalizado = nombreRol == null ? "CLIENTE" : nombreRol.trim().toUpperCase();
+        if (rolNormalizado.startsWith("ROLE_")) {
+            rolNormalizado = rolNormalizado.substring(5);
+        }
 
         return new User(
                 usuario.getEmail(),
@@ -32,7 +36,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 true,
                 true,
                 true,
-            java.util.List.of(new SimpleGrantedAuthority("ROLE_" + nombreRol))
+            java.util.List.of(new SimpleGrantedAuthority("ROLE_" + rolNormalizado))
         );
     }
 }
