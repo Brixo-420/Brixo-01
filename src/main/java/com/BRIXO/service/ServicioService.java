@@ -32,6 +32,7 @@ public class ServicioService {
     public List<Servicio> listarFiltrados(String titulo, String estado, String emailCliente, String usuarioActualEmail, boolean esAdmin, boolean esCliente, boolean esContratista) {
         Specification<Servicio> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            query.distinct(true);
 
             // LEFT JOINs para evitar excluir servicios con cliente/contratista null
             Join<Object, Object> clienteJoin = root.join("cliente", JoinType.LEFT);

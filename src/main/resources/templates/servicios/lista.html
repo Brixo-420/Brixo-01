@@ -151,7 +151,7 @@
                     <label for="estado">Estado</label>
                     <select id="estado" name="estado">
                         <option value="">Todos</option>
-                        <option th:each="e : ${estados}" th:value="${e}" th:text="${e}" th:selected="${estado == e.name()}"></option>
+                        <option th:each="e : ${estados}" th:value="${e.name()}" th:text="${e.name()}" th:selected="${estado != null and estado.equals(e.name())}"></option>
                     </select>
                 </div>
                 <div th:if="${esAdmin}">
