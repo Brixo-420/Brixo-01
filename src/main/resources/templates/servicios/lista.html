@@ -55,6 +55,13 @@
             </div>
             <div class="col-md-2 d-flex align-items-end gap-2">
                 <button type="submit" class="btn btn-primary">Filtrar</button>
+                <a class="btn btn-outline-secondary" th:href="@{/servicios}">Limpiar</a>
+                <a class="btn btn-outline-info" 
+                   th:href="@{/servicios(titulo=${titulo},estado=${estado},emailCliente=${emailCliente})}"
+                   onclick="location.reload(); return false;"
+                   title="Recargar lista">
+                    <i class="fas fa-sync-alt"></i>
+                </a>
                 <a class="btn btn-outline-secondary"
                    th:href="@{/servicios/reporte.csv(titulo=${titulo},estado=${estado},emailCliente=${emailCliente})}">
                     CSV
@@ -84,9 +91,13 @@
                 <td th:text="${s.titulo}"></td>
                 <td th:text="${s.ubicacion}"></td>
                 <td th:text="${#numbers.formatDecimal(s.presupuesto, 1, 'POINT', 2, 'COMMA')}"></td>
-                <td th:text="${s.estado}"></td>
+                <td>
+                    <span class="badge" 
+                          th:classappend="${s.estado.name() == 'ABIERTO' ? 'bg-warning text-dark' : s.estado.name() == 'EN_PROCESO' ? 'bg-info text-white' : 'bg-success text-white'}"
+                          th:text="${s.estado}"></span>
+                </td>
                 <td th:text="${s.cliente != null ? s.cliente.email : '-'}"></td>
-                                <td th:text="${s.contratistaAsignado != null ? s.contratistaAsignado.email : 'Sin asignar'}"></td>
+                <td th:text="${s.contratistaAsignado != null ? s.contratistaAsignado.email : 'Sin asignar'}"></td>
                 <td th:text="${#temporals.format(s.fechaCreacion, 'yyyy-MM-dd HH:mm')}"></td>
                 <td class="text-end">
                                         <form th:if="${esContratista and s.estado.name() == 'ABIERTO' and (s.contratistaAsignado == null or s.contratistaAsignado.email == #authentication.name)}"
@@ -121,5 +132,18 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <div th:replace="~{fragments/navbar :: navbarJs}"></div>
+<script>
+    // Auto-refresh de la lista cada 30 segundos si la ventana está activa
+    let pageActive = true;
+    
+    window.addEventListener('focus', () => { pageActive = true; });
+    window.addEventListener('blur', () => { pageActive = false; });
+    
+    setInterval(() => {
+        if (pageActive) {
+            location.reload();
+        }
+    }, 30000); // 30 segundos
+</script>
 </body>
 </html>
