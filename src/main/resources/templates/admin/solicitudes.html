@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Solicitudes de Contratista | Brixo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/design-system.css}">
+    <link rel="stylesheet" th:href="@{/css/brixo.css}">
+</head>
+<body style="padding-top:70px;background:#f8fafc">
+<div th:replace="~{fragments/navbar :: navbar(overlay=false)}"></div>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-user-tie me-2"></i>Solicitudes de Contratista
+            <span th:if="${pendientes > 0}" class="badge bg-danger ms-2" th:text="${pendientes} + ' pendientes'"></span>
+        </h1>
+        <a th:href="@{/admin/usuarios}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Volver a usuarios
+        </a>
+    </div>
+
+    <div th:if="${ok}" class="alert alert-success" th:text="${ok}"></div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Fecha solicitud</th>
+                <th>Estado</th>
+                <th>Fecha respuesta</th>
+                <th class="text-end">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${solicitudes}">
+                <td th:text="${s.id}"></td>
+                <td th:text="${s.usuario.nombre}"></td>
+                <td th:text="${s.usuario.email}"></td>
+                <td th:text="${#temporals.format(s.fechaSolicitud, 'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+                    <span th:if="${s.estado.name() == 'PENDIENTE'}" class="badge bg-warning text-dark">Pendiente</span>
+                    <span th:if="${s.estado.name() == 'APROBADA'}" class="badge bg-success">Aprobada</span>
+                    <span th:if="${s.estado.name() == 'RECHAZADA'}" class="badge bg-danger">Rechazada</span>
+                </td>
+                <td>
+                    <span th:if="${s.fechaRespuesta != null}" th:text="${#temporals.format(s.fechaRespuesta, 'dd/MM/yyyy HH:mm')}"></span>
+                    <span th:if="${s.fechaRespuesta == null}" class="text-muted">—</span>
+                </td>
+                <td class="text-end">
+                    <div th:if="${s.estado.name() == 'PENDIENTE'}">
+                        <form th:action="@{/admin/solicitudes/{id}/aprobar(id=${s.id})}" method="post" class="d-inline">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button type="submit" class="btn btn-sm btn-success"
+                                    onclick="return confirm('¿Aprobar esta solicitud? El usuario pasará a ser contratista.')">
+                                <i class="fas fa-check me-1"></i> Aprobar
+                            </button>
+                        </form>
+                        <form th:action="@{/admin/solicitudes/{id}/rechazar(id=${s.id})}" method="post" class="d-inline">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('¿Rechazar esta solicitud?')">
+                                <i class="fas fa-times me-1"></i> Rechazar
+                            </button>
+                        </form>
+                    </div>
+                    <span th:if="${s.estado.name() != 'PENDIENTE'}" class="text-muted">Resuelta</span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(solicitudes)}">
+                <td colspan="7" class="text-center text-muted py-4">No hay solicitudes registradas.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<div th:replace="~{fragments/navbar :: navbarJs}"></div>
+</body>
+</html>

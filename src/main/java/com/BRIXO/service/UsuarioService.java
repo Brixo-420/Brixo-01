@@ -70,6 +70,21 @@ public class UsuarioService {
         return usuarioRepository.save(actual);
     }
 
+    @Transactional
+    public Usuario registrar(Usuario usuario) {
+        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
+            throw new IllegalArgumentException("El correo ya esta registrado");
+        }
+        if (usuario.getPassword() == null || usuario.getPassword().isBlank() || usuario.getPassword().length() < 6) {
+            throw new IllegalArgumentException("La contraseña debe tener minimo 6 caracteres");
+        }
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        Rol rolCliente = rolRepository.findByNombre("CLIENTE")
+                .orElseThrow(() -> new IllegalArgumentException("Rol CLIENTE no encontrado"));
+        usuario.setRol(rolCliente);
+        return usuarioRepository.save(usuario);
+    }
+
     public void eliminar(Long id) {
         usuarioRepository.deleteById(id);
     }
