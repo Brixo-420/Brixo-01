@@ -6,7 +6,11 @@ import com.BRIXO.model.TipoServicio;
 import com.BRIXO.service.ServicioService;
 import jakarta.validation.Valid;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -25,11 +29,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -166,63 +169,71 @@ public class ServicioController {
         }
     }
 
-    @PostMapping("/importar-excel")
-    public String importarExcel(
-            @RequestParam("archivo") MultipartFile archivo,
-            Authentication authentication,
-            RedirectAttributes redirectAttributes
-    ) {
-        if (!puedeEditar(authentication)) {
-            redirectAttributes.addFlashAttribute("error", "No tienes permisos para importar servicios");
-            return "redirect:/servicios";
-        }
+    @GetMapping("/reporte.xlsx")
+    @ResponseBody
+    public ResponseEntity<byte[]> exportarExcel(
+            @RequestParam(required = false) String titulo,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String emailCliente,
+            Authentication authentication
+    ) throws IOException {
+        boolean esAdmin = tieneRol(authentication, "ROLE_ADMIN");
+        boolean esCliente = tieneRol(authentication, "ROLE_CLIENTE");
 
-        if (archivo == null || archivo.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Debes seleccionar un archivo .xlsx");
-            return "redirect:/servicios";
-        }
+        List<Servicio> servicios = servicioService.listarFiltrados(
+                titulo, estado, emailCliente, authentication.getName(), esAdmin, esCliente);
 
-        if (!archivo.getOriginalFilename().toLowerCase().endsWith(".xlsx")) {
-            redirectAttributes.addFlashAttribute("error", "Formato invalido. Usa un archivo .xlsx");
-            return "redirect:/servicios";
-        }
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-        int creados = 0;
-        DataFormatter formatter = new DataFormatter();
-        try (Workbook workbook = new XSSFWorkbook(archivo.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0);
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                Row row = sheet.getRow(i);
-                if (row == null || filaVacia(row, formatter)) {
-                    continue;
-                }
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Servicios");
 
-                Servicio servicio = new Servicio();
-                servicio.setTitulo(valorTexto(row.getCell(0), formatter));
-                servicio.setDescripcion(valorTexto(row.getCell(1), formatter));
-                servicio.setUbicacion(valorTexto(row.getCell(2), formatter));
+            // Estilo cabecera
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setColor(IndexedColors.WHITE.getIndex());
+            headerStyle.setFont(headerFont);
+            headerStyle.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
 
-                String presupuestoTexto = valorTexto(row.getCell(3), formatter);
-                if (presupuestoTexto.isBlank()) {
-                    throw new IllegalArgumentException("Fila " + (i + 1) + ": presupuesto vacio");
-                }
-                servicio.setPresupuesto(new BigDecimal(presupuestoTexto.replace(",", ".")));
-
-                String estadoTexto = valorTexto(row.getCell(4), formatter);
-                EstadoServicio estado = estadoTexto.isBlank() ? EstadoServicio.ABIERTO : EstadoServicio.valueOf(estadoTexto.toUpperCase());
-                servicio.setEstado(estado);
-
-                servicioService.crear(servicio, authentication.getName());
-                creados++;
+            String[] columnas = {"ID", "Título", "Tipo", "Ubicación", "Presupuesto", "Estado", "Cliente", "Contratista", "Fecha creación"};
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < columnas.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columnas[i]);
+                cell.setCellStyle(headerStyle);
             }
-            redirectAttributes.addFlashAttribute("ok", "Importacion completada. Servicios creados: " + creados);
-        } catch (IllegalArgumentException ex) {
-            redirectAttributes.addFlashAttribute("error", "Error en importacion: " + ex.getMessage());
-        } catch (IOException ex) {
-            redirectAttributes.addFlashAttribute("error", "No se pudo leer el archivo Excel");
-        }
 
-        return "redirect:/servicios";
+            // Datos
+            int rowIdx = 1;
+            for (Servicio s : servicios) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(s.getId());
+                row.createCell(1).setCellValue(s.getTitulo());
+                row.createCell(2).setCellValue(s.getTipo() != null ? s.getTipo().getDisplayName() : "");
+                row.createCell(3).setCellValue(s.getUbicacion());
+                row.createCell(4).setCellValue(s.getPresupuesto() != null ? s.getPresupuesto().doubleValue() : 0);
+                row.createCell(5).setCellValue(s.getEstado() != null ? s.getEstado().name() : "");
+                row.createCell(6).setCellValue(s.getCliente() != null ? s.getCliente().getEmail() : "");
+                row.createCell(7).setCellValue(s.getContratistaAsignado() != null ? s.getContratistaAsignado().getEmail() : "");
+                row.createCell(8).setCellValue(s.getFechaCreacion() != null ? s.getFechaCreacion().format(dtf) : "");
+            }
+
+            // Autoajustar columnas
+            for (int i = 0; i < columnas.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=servicios-reporte.xlsx")
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .body(out.toByteArray());
+        }
     }
 
     @GetMapping("/{id}/detalle")
@@ -407,20 +418,4 @@ public class ServicioController {
         return "\"" + escaped + "\"";
     }
 
-    private boolean filaVacia(Row row, DataFormatter formatter) {
-        for (int i = 0; i < 5; i++) {
-            Cell cell = row.getCell(i);
-            if (!valorTexto(cell, formatter).isBlank()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private String valorTexto(Cell cell, DataFormatter formatter) {
-        if (cell == null) {
-            return "";
-        }
-        return formatter.formatCellValue(cell).trim();
-    }
 }

@@ -137,19 +137,6 @@
     <div th:if="${ok}" class="bx-alert bx-alert-ok"><i class="fas fa-check-circle"></i> <span th:text="${ok}"></span></div>
     <div th:if="${error}" class="bx-alert bx-alert-err"><i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span></div>
 
-    <!-- IMPORTAR EXCEL -->
-    <div th:if="${esCliente or esAdmin}" class="bx-card">
-        <form method="post" enctype="multipart/form-data" th:action="@{/servicios/importar-excel}">
-            <div class="import-bar">
-                <div class="file-input">
-                    <label for="archivo"><i class="fas fa-file-excel"></i> Importar Excel (.xlsx)</label>
-                    <input id="archivo" name="archivo" type="file" accept=".xlsx" required>
-                </div>
-                <button type="submit" class="btn-bx btn-bx-outline"><i class="fas fa-upload"></i> Importar</button>
-            </div>
-        </form>
-    </div>
-
     <!-- FILTROS -->
     <div class="bx-card">
         <form method="get" th:action="@{/servicios}">
@@ -173,8 +160,11 @@
                     <button type="submit" class="btn-bx btn-bx-primary"><i class="fas fa-search"></i> Filtrar</button>
                     <a class="btn-bx btn-bx-outline" th:href="@{/servicios}"><i class="fas fa-times"></i></a>
                     <a class="btn-bx btn-bx-outline"
+                       th:href="@{/servicios/reporte.xlsx(titulo=${titulo},estado=${estado},emailCliente=${emailCliente})}"
+                       title="Exportar Excel"><i class="fas fa-file-excel"></i> Excel</a>
+                    <a class="btn-bx btn-bx-outline"
                        th:href="@{/servicios/reporte.csv(titulo=${titulo},estado=${estado},emailCliente=${emailCliente})}"
-                       title="Exportar CSV"><i class="fas fa-download"></i> CSV</a>
+                       title="Exportar CSV"><i class="fas fa-file-csv"></i> CSV</a>
                 </div>
             </div>
         </form>
