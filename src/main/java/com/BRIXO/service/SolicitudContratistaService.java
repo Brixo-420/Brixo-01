@@ -32,6 +32,9 @@ public class SolicitudContratistaService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
+        if (usuario.isContratistaAprobado()) {
+            throw new IllegalArgumentException("Ya eres contratista");
+        }
         if (usuario.getRol() != null && "CONTRATISTA".equalsIgnoreCase(usuario.getRol().getNombre())) {
             throw new IllegalArgumentException("Ya eres contratista");
         }
@@ -73,6 +76,7 @@ public class SolicitudContratistaService {
 
         Usuario usuario = solicitud.getUsuario();
         usuario.setRol(rolContratista);
+        usuario.setContratistaAprobado(true);
         usuarioRepository.save(usuario);
     }
 

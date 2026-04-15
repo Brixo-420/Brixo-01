@@ -42,4 +42,7 @@ public class Usuario {
     @ManyToOne
     @JoinColumn(name = "rol_id")
     private Rol rol;
+
+    @Column(name = "contratista_aprobado")
+    private boolean contratistaAprobado = false;
 }
