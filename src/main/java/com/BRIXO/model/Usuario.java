@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,10 +37,15 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 120)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false, length = 120)
     private String password;
 
     @ManyToOne
     @JoinColumn(name = "rol_id")
     private Rol rol;
+
+    /** Coordenadas para el mapa: "lat,lng" (ej. "4.7110,-74.0721"). Opcional. */
+    @Column(length = 50)
+    private String ubicacionMapa;
 }

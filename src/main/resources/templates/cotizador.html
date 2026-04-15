@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cotizador Inteligente – Brixo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/design-system.css}">
+    <link rel="stylesheet" th:href="@{/css/brixo.css}">
+
+    <style>
+        .cotizador-hero {
+            background: linear-gradient(135deg, #3a4a6b 0%, #1e2d45 100%);
+        }
+        .result-card { display: none; }
+        .result-card.show { display: block; }
+        #spinner { display: none; }
+        #spinner.active { display: inline-block; }
+        .example-chip {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .example-chip:hover {
+            background-color: #3a4a6b !important;
+            color: #fff !important;
+            transform: translateY(-1px);
+        }
+        .badge-bajo  { background-color: #198754; }
+        .badge-medio { background-color: #fd7e14; }
+        .badge-alto  { background-color: #dc3545; }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100" style="background:#f8fafc">
+
+    <div th:replace="~{fragments/navbar :: navbar(overlay=false)}"></div>
+
+    <!-- Hero -->
+    <section class="cotizador-hero text-white py-5">
+        <div class="container text-center" style="max-width:720px">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-robot me-2"></i>Cotizador Inteligente
+            </h1>
+            <p class="lead mb-0 opacity-75">
+                Describe lo que necesitas y nuestra IA generará una cotización
+                desglosada al instante.
+            </p>
+        </div>
+    </section>
+
+    <!-- Contenido principal -->
+    <div class="container py-5 flex-grow-1" style="max-width:800px">
+
+        <!-- Formulario -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4 p-md-5">
+                <form id="cotizadorForm" th:action="@{/cotizador/generar}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" id="csrfInput">
+
+                    <label for="descripcion" class="form-label fw-bold fs-5 mb-3">
+                        <i class="fas fa-pencil-alt text-primary me-2"></i>¿Qué servicio necesitas?
+                    </label>
+                    <textarea id="descripcion" name="descripcion"
+                              class="form-control form-control-lg rounded-3 mb-3"
+                              rows="4"
+                              placeholder="Ej: Quiero remodelar mi baño, cambiar 4 baldosas y arreglar el grifo que gotea"
+                              required minlength="10" maxlength="2000"></textarea>
+
+                    <div class="mb-4">
+                        <small class="text-muted fw-semibold">Ejemplos rápidos:</small>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <span class="badge bg-light text-dark border example-chip"
+                                  data-text="Quiero remodelar mi baño, cambiar 4 baldosas y arreglar el grifo que gotea">
+                                🛁 Remodelación baño
+                            </span>
+                            <span class="badge bg-light text-dark border example-chip"
+                                  data-text="Reparar una pared con humedad de 2 metros cuadrados">
+                                🧱 Pared con humedad
+                            </span>
+                            <span class="badge bg-light text-dark border example-chip"
+                                  data-text="Pintar 3 habitaciones de 12 metros cuadrados cada una">
+                                🎨 Pintar habitaciones
+                            </span>
+                            <span class="badge bg-light text-dark border example-chip"
+                                  data-text="Instalar 6 puntos de luz LED en el techo del salón">
+                                💡 Instalación eléctrica
+                            </span>
+                            <span class="badge bg-light text-dark border example-chip"
+                                  data-text="Instalar aire acondicionado tipo split de 12000 BTU en una habitación">
+                                ❄️ Aire acondicionado
+                            </span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 w-100" id="btnGenerar">
+                        <span id="spinner" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        <i class="fas fa-magic me-2" id="iconMagic"></i>Generar Cotización
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Alerta de error -->
+        <div id="alertError" class="alert alert-danger rounded-3 d-flex align-items-center d-none">
+            <i class="fas fa-exclamation-triangle me-2 flex-shrink-0"></i>
+            <span id="errorText"></span>
+        </div>
+
+        <!-- Resultado (renderizado por JS) -->
+        <div class="result-card" id="resultCard"></div>
+
+        <!-- Info sin API key configurada -->
+        <div class="alert alert-info rounded-3 mt-3" th:if="${param.nokey != null}">
+            <i class="fas fa-info-circle me-2"></i>
+            El administrador aún no ha configurado la clave de IA.
+            Contacta al soporte para habilitarlo.
+        </div>
+
+    </div>
+
+    <div th:replace="~{fragments/navbar :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div th:replace="~{fragments/navbar :: navbarJs}"></div>
+
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+    const isLoggedIn = /*[[${loggedIn}]]*/ false;
+    /*]]>*/
+
+    (function () {
+        const form       = document.getElementById('cotizadorForm');
+        const textarea   = document.getElementById('descripcion');
+        const btnGenerar = document.getElementById('btnGenerar');
+        const spinner    = document.getElementById('spinner');
+        const iconMagic  = document.getElementById('iconMagic');
+        const resultCard = document.getElementById('resultCard');
+        const alertError = document.getElementById('alertError');
+
+        // Chips de ejemplo
+        document.querySelectorAll('.example-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                textarea.value = chip.dataset.text;
+                textarea.focus();
+            });
+        });
+
+        // Envío AJAX
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            alertError.classList.add('d-none');
+            btnGenerar.disabled      = true;
+            spinner.style.display    = 'inline-block';
+            iconMagic.style.display  = 'none';
+
+            const csrfParam = document.getElementById('csrfInput').name;
+            const csrfToken = document.getElementById('csrfInput').value;
+
+            const formData = new FormData(form);
+
+            fetch('/cotizador/generar', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            })
+            .then(r => {
+                if (!r.ok) throw new Error('Error de red: ' + r.status);
+                return r.json();
+            })
+            .then(json => {
+                if (json.ok) {
+                    resultCard.innerHTML = renderCotizacion(json.data);
+                    resultCard.classList.add('show');
+                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    showError(json.error || 'Error desconocido. Intenta de nuevo.');
+                }
+            })
+            .catch(err => showError('Error de conexión. Por favor intenta de nuevo.'))
+            .finally(() => {
+                btnGenerar.disabled     = false;
+                spinner.style.display   = 'none';
+                iconMagic.style.display = 'inline-block';
+            });
+        });
+
+        function showError(msg) {
+            document.getElementById('errorText').textContent = msg;
+            alertError.classList.remove('d-none');
+        }
+
+        function esc(s) {
+            const d = document.createElement('div');
+            d.textContent = String(s);
+            return d.innerHTML;
+        }
+
+        function badgeComplejidad(nivel) {
+            const classMap = { bajo: 'badge-bajo', medio: 'badge-medio', alto: 'badge-alto' };
+            const iconMap  = { bajo: 'check-circle', medio: 'exclamation-circle', alto: 'exclamation-triangle' };
+            const cls      = classMap[nivel] || 'bg-secondary';
+            const icon     = iconMap[nivel]  || 'info-circle';
+            const label    = nivel ? nivel.charAt(0).toUpperCase() + nivel.slice(1) : '—';
+            return `<span class="badge ${cls} rounded-pill px-3 py-2">
+                        <i class="fas fa-${icon} me-1"></i>${label}
+                    </span>`;
+        }
+
+        function renderCotizacion(d) {
+            const materialesRows = (d.materiales || []).map(m =>
+                `<tr>
+                    <td><i class="fas fa-box text-muted me-2"></i>${esc(m.nombre)}</td>
+                    <td class="text-end fw-semibold">${esc(m.cantidad_estimada)}</td>
+                 </tr>`
+            ).join('');
+
+            const personalRows = (d.personal || []).map(p =>
+                `<tr>
+                    <td><i class="fas fa-hard-hat text-muted me-2"></i>${esc(p.rol)}</td>
+                    <td class="text-end fw-semibold">${esc(p.horas_estimadas)} hrs</td>
+                 </tr>`
+            ).join('');
+
+            const actionBtn = isLoggedIn
+                ? `<a href="/servicios/nuevo" class="btn btn-success btn-lg rounded-pill w-100 fw-bold">
+                       <i class="fas fa-clipboard-list me-2"></i>Crear Solicitud de Servicio
+                   </a>`
+                : `<a href="/login" class="btn btn-outline-primary btn-lg rounded-pill w-100 fw-bold">
+                       <i class="fas fa-sign-in-alt me-2"></i>Inicia sesión para continuar
+                   </a>`;
+
+            return `
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mt-4">
+                <div class="card-header bg-primary text-white py-3 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-file-invoice me-2"></i>Cotización Estimada</h5>
+                    ${badgeComplejidad(d.complejidad)}
+                </div>
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-primary mb-3">
+                        <i class="fas fa-tools me-2"></i>${esc(d.servicio_principal)}
+                    </h6>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold mb-2 text-muted text-uppercase" style="font-size:.75rem;letter-spacing:.05em">
+                                <i class="fas fa-boxes me-1"></i>Materiales estimados
+                            </h6>
+                            <table class="table table-sm table-hover rounded-3 overflow-hidden">
+                                <thead class="table-light">
+                                    <tr><th>Material</th><th class="text-end">Cantidad</th></tr>
+                                </thead>
+                                <tbody>${materialesRows || '<tr><td colspan="2" class="text-muted">Sin materiales</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold mb-2 text-muted text-uppercase" style="font-size:.75rem;letter-spacing:.05em">
+                                <i class="fas fa-users me-1"></i>Personal necesario
+                            </h6>
+                            <table class="table table-sm table-hover rounded-3 overflow-hidden">
+                                <thead class="table-light">
+                                    <tr><th>Rol</th><th class="text-end">Horas est.</th></tr>
+                                </thead>
+                                <tbody>${personalRows || '<tr><td colspan="2" class="text-muted">Sin personal</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning rounded-3 mt-3 py-2 small mb-4">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Esta cotización es una <strong>estimación orientativa</strong> generada por IA.
+                        Los precios reales pueden variar según el profesional y la zona.
+                    </div>
+
+                    ${actionBtn}
+                </div>
+            </div>`;
+        }
+    })();
+    </script>
+
+</body>
+</html>
