@@ -61,6 +61,7 @@ public class UsuarioService {
 
         actual.setNombre(cambios.getNombre());
         actual.setEmail(cambios.getEmail());
+        actual.setTelefono(cambios.getTelefono());
         actual.setRol(obtenerRol(rolId));
 
         if (cambios.getPassword() != null && !cambios.getPassword().isBlank()) {

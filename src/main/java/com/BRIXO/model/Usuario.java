@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,11 @@ public class Usuario {
     @Email(message = "Correo invalido")
     @Column(nullable = false, unique = true, length = 120)
     private String email;
+
+    @Size(max = 20, message = "El teléfono no puede superar 20 caracteres")
+    @Pattern(regexp = "^$|^[+]?[0-9\\s\\-()]{7,20}$", message = "Teléfono inválido")
+    @Column(length = 20)
+    private String telefono;
 
     @Column(nullable = false, length = 120)
     private String password;

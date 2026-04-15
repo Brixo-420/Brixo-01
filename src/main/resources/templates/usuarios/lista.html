@@ -180,6 +180,10 @@
                         <i class="fas fa-envelope"></i>
                         <span th:text="${u.email}"></span>
                     </div>
+                    <div class="user-meta-item" th:if="${u.telefono != null and !u.telefono.isEmpty()}">
+                        <i class="fas fa-phone"></i>
+                        <span th:text="${u.telefono}"></span>
+                    </div>
                 </div>
             </div>
             <div class="user-card-actions">

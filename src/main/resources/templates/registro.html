@@ -155,6 +155,12 @@
         </div>
 
         <div class="field">
+            <label for="telefono">Teléfono</label>
+            <input id="telefono" th:field="*{telefono}" type="tel" placeholder="+52 55 1234 5678" maxlength="20">
+            <div th:if="${#fields.hasErrors('telefono')}" class="field-error" th:errors="*{telefono}"></div>
+        </div>
+
+        <div class="field">
             <label for="password">Contraseña</label>
             <input id="password" th:field="*{password}" type="password" required placeholder="Mínimo 6 caracteres">
         </div>

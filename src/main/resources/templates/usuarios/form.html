@@ -112,6 +112,14 @@
                     </div>
 
                     <div class="field">
+                        <label for="telefono"><i class="fas fa-phone"></i> Teléfono</label>
+                        <input id="telefono" type="tel" th:field="*{telefono}" maxlength="20" placeholder="Ej: +52 55 1234 5678">
+                        <div class="hint">Opcional — formato libre</div>
+                        <div class="err" id="telefonoError">Teléfono inválido</div>
+                        <div class="err show" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></div>
+                    </div>
+
+                    <div class="field">
                         <label for="password">
                             <i class="fas fa-lock"></i> Contraseña
                             <span class="req" th:if="${usuario.id == null}">*</span>
