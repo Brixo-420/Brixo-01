@@ -79,7 +79,7 @@
                 <div class="text-danger small" th:if="${#fields.hasErrors('presupuesto')}" th:errors="*{presupuesto}"></div>
             </div>
             
-            <div class="col-md-6">
+            <div class="col-md-6" sec:authorize="hasRole('ROLE_ADMIN')">
                 <label class="form-label" for="estado">Estado <span class="text-danger">*</span></label>
                 <select id="estado" th:field="*{estado}" class="form-select" required>
                     <option value="">Selecciona un estado</option>
@@ -87,6 +87,11 @@
                 </select>
                 <div class="error-message" id="estadoError">El estado es requerido</div>
                 <div class="text-danger small" th:if="${#fields.hasErrors('estado')}" th:errors="*{estado}"></div>
+            </div>
+            
+            <!-- Campo oculto para preservar el estado cuando no es ADMIN -->
+            <div sec:authorize="!hasRole('ROLE_ADMIN')" style="display: none;">
+                <input type="hidden" th:field="*{estado}">
             </div>
             
             <div class="col-12">

@@ -76,7 +76,12 @@ public class ServicioService {
         actual.setDescripcion(cambios.getDescripcion());
         actual.setUbicacion(cambios.getUbicacion());
         actual.setPresupuesto(cambios.getPresupuesto());
-        actual.setEstado(cambios.getEstado());
+        
+        // Solo ADMIN puede cambiar el estado del servicio
+        // Si es ADMIN y envía un estado válido, actualizar; si no es ADMIN, ignorar cambios de estado
+        if (esAdmin && cambios.getEstado() != null) {
+            actual.setEstado(cambios.getEstado());
+        }
 
         return servicioRepository.save(actual);
     }

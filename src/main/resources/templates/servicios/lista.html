@@ -104,10 +104,10 @@
                                                     method="post" class="d-inline">
                                                 <button type="submit" class="btn btn-sm btn-success">Finalizar</button>
                                         </form>
-                    <a th:if="${esAdmin or (esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name)}"
+                    <a th:if="${esAdmin or (esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name and s.contratistaAsignado == null)}"
                        class="btn btn-sm btn-outline-primary"
                        th:href="@{/servicios/{id}/editar(id=${s.id})}">Editar</a>
-                    <form th:if="${esAdmin or (esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name)}"
+                    <form th:if="${esAdmin or (esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name and s.contratistaAsignado == null)}"
                           th:action="@{/servicios/{id}/eliminar(id=${s.id})}"
                           method="post" class="d-inline">
                         <button type="submit" class="btn btn-sm btn-outline-danger"
