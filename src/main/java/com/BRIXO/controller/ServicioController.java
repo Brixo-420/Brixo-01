@@ -160,18 +160,48 @@ public class ServicioController {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Servicios");
             sheet.setDisplayGridlines(false);
+            sheet.setPrintGridlines(false);
 
             // ── Colores corporativos ──
-            byte[] colorPrimario = new byte[]{(byte) 15, (byte) 23, (byte) 42};     // #0f172a (azul oscuro)
-            byte[] colorAccento  = new byte[]{(byte) 14, (byte) 165, (byte) 233};    // #0ea5e9
-            byte[] colorGrisClaro = new byte[]{(byte) 248, (byte) 250, (byte) 252};  // #f8fafc
-            byte[] colorBorde    = new byte[]{(byte) 226, (byte) 232, (byte) 240};   // #e2e8f0
+            byte[] cPrimario   = {(byte)15,(byte)23,(byte)42};       // #0f172a
+            byte[] cAccento    = {(byte)14,(byte)165,(byte)233};      // #0ea5e9
+            byte[] cAccentoBg  = {(byte)224,(byte)242,(byte)254};     // #e0f2fe (azul claro)
+            byte[] cGrisClaro  = {(byte)248,(byte)250,(byte)252};     // #f8fafc
+            byte[] cBorde      = {(byte)203,(byte)213,(byte)225};     // #cbd5e1
+            byte[] cBordeLight = {(byte)226,(byte)232,(byte)240};     // #e2e8f0
+            byte[] cBlanco     = {(byte)255,(byte)255,(byte)255};
+            byte[] cSuccess    = {(byte)16,(byte)185,(byte)129};      // #10b981
+            byte[] cSuccessBg  = {(byte)209,(byte)250,(byte)229};     // #d1fae5
+            byte[] cWarning    = {(byte)245,(byte)158,(byte)11};      // #f59e0b
+            byte[] cWarningBg  = {(byte)254,(byte)243,(byte)199};     // #fef3c7
+            byte[] cDanger     = {(byte)239,(byte)68,(byte)68};       // #ef4444
+            byte[] cSecondary  = {(byte)99,(byte)102,(byte)241};      // #6366f1
+            byte[] cSecBg      = {(byte)224,(byte)231,(byte)255};     // #e0e7ff
+            byte[] cTotalBg    = {(byte)30,(byte)41,(byte)59};        // #1e293b
 
-            DataFormat dataFormat = workbook.createDataFormat();
+            DataFormat fmt = workbook.createDataFormat();
             int numCols = 9;
 
+            // ══════════ BANNER SUPERIOR CON COLOR ══════════
+            XSSFCellStyle bannerStyle = workbook.createCellStyle();
+            bannerStyle.setFillForegroundColor(new XSSFColor(cPrimario, null));
+            bannerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+            // Fila 0: barra de color superior (delgada)
+            Row bannerRow = sheet.createRow(0);
+            bannerRow.setHeightInPoints(6);
+            for (int i = 0; i < numCols; i++) {
+                Cell c = bannerRow.createCell(i);
+                c.setCellStyle(bannerStyle);
+            }
+
+            // Filas 1-4: espacio para el logo
+            for (int i = 1; i <= 4; i++) {
+                Row r = sheet.createRow(i);
+                r.setHeightInPoints(i == 1 ? 8 : 22);
+            }
+
             // ── Insertar logo ──
-            int logoRowStart = 0;
             try {
                 ClassPathResource logoRes = new ClassPathResource("static/images/logo empresa brixo.jpg");
                 if (logoRes.exists()) {
@@ -179,65 +209,109 @@ public class ServicioController {
                         byte[] logoBytes = IOUtils.toByteArray(logoStream);
                         int pictureIdx = workbook.addPicture(logoBytes, Workbook.PICTURE_TYPE_JPEG);
                         XSSFDrawing drawing = (XSSFDrawing) sheet.createDrawingPatriarch();
-                        XSSFClientAnchor anchor = new XSSFClientAnchor(0, 0, 0, 0, 0, 0, 3, 4);
+                        XSSFClientAnchor anchor = new XSSFClientAnchor(
+                            0, 50000, 0, 0,
+                            0, 1, 3, 5
+                        );
                         anchor.setAnchorType(XSSFClientAnchor.AnchorType.MOVE_AND_RESIZE);
                         drawing.createPicture(anchor, pictureIdx);
                     }
                 }
-            } catch (Exception ignored) {
-                // Si no hay logo, continuar sin él
-            }
+            } catch (Exception ignored) { }
 
-            // Filas vacías para el logo
-            for (int i = 0; i < 4; i++) {
-                Row r = sheet.createRow(i);
-                r.setHeightInPoints(22);
-            }
-
-            // ── Título del reporte ──
-            Row titleRow = sheet.createRow(4);
-            titleRow.setHeightInPoints(32);
-            CellStyle titleStyle = workbook.createCellStyle();
+            // ══════════ TÍTULO ══════════
+            Row titleRow = sheet.createRow(5);
+            titleRow.setHeightInPoints(36);
+            XSSFCellStyle titleStyle = workbook.createCellStyle();
             Font titleFont = workbook.createFont();
             titleFont.setBold(true);
-            titleFont.setFontHeightInPoints((short) 18);
+            titleFont.setFontHeightInPoints((short) 20);
             titleFont.setFontName("Calibri");
-            ((XSSFCellStyle) titleStyle).setFont(titleFont);
-            XSSFColor titleColor = new XSSFColor(colorPrimario, null);
-            titleFont.setColor(titleColor.getIndex());
-            ((XSSFCellStyle) titleStyle).setFont(titleFont);
+            titleFont.setColor(new XSSFColor(cPrimario, null).getIndex());
+            titleStyle.setFont(titleFont);
+            titleStyle.setVerticalAlignment(VerticalAlignment.BOTTOM);
             Cell titleCell = titleRow.createCell(0);
             titleCell.setCellValue("Reporte de Servicios");
             titleCell.setCellStyle(titleStyle);
-            sheet.addMergedRegion(new CellRangeAddress(4, 4, 0, numCols - 1));
-
-            // ── Subtítulo con fecha ──
-            Row subtitleRow = sheet.createRow(5);
-            subtitleRow.setHeightInPoints(20);
-            CellStyle subtitleStyle = workbook.createCellStyle();
-            Font subtitleFont = workbook.createFont();
-            subtitleFont.setFontHeightInPoints((short) 10);
-            subtitleFont.setFontName("Calibri");
-            subtitleFont.setColor(IndexedColors.GREY_50_PERCENT.getIndex());
-            subtitleStyle.setFont(subtitleFont);
-            Cell subtitleCell = subtitleRow.createCell(0);
-            subtitleCell.setCellValue("Generado el " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'a las' HH:mm")) + "  |  Total: " + servicios.size() + " servicios");
-            subtitleCell.setCellStyle(subtitleStyle);
             sheet.addMergedRegion(new CellRangeAddress(5, 5, 0, numCols - 1));
 
-            // Fila separadora
-            Row sepRow = sheet.createRow(6);
-            sepRow.setHeightInPoints(6);
+            // ── Línea acento ──
+            Row accentRow = sheet.createRow(6);
+            accentRow.setHeightInPoints(4);
+            XSSFCellStyle accentStyle = workbook.createCellStyle();
+            accentStyle.setFillForegroundColor(new XSSFColor(cAccento, null));
+            accentStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            for (int i = 0; i < 4; i++) {
+                Cell c = accentRow.createCell(i);
+                c.setCellStyle(accentStyle);
+            }
 
-            // ── Estilo cabecera de tabla ──
+            // ══════════ RESUMEN EJECUTIVO ══════════
+            long countAbiertos = servicios.stream().filter(s -> s.getEstado() == EstadoServicio.ABIERTO).count();
+            long countEnProceso = servicios.stream().filter(s -> s.getEstado() == EstadoServicio.EN_PROCESO).count();
+            long countCerrados = servicios.stream().filter(s -> s.getEstado() == EstadoServicio.CERRADO).count();
+            long countCotizacion = servicios.stream().filter(s -> s.getEstado() == EstadoServicio.EN_COTIZACION).count();
+            double totalPresupuesto = servicios.stream()
+                .mapToDouble(s -> s.getPresupuesto() != null ? s.getPresupuesto().doubleValue() : 0).sum();
+
+            // Fila 7: espacio
+            Row spaceRow = sheet.createRow(7);
+            spaceRow.setHeightInPoints(10);
+
+            // Fila 8: Info y resumen
+            Row infoRow = sheet.createRow(8);
+            infoRow.setHeightInPoints(22);
+            XSSFCellStyle infoStyle = workbook.createCellStyle();
+            Font infoFont = workbook.createFont();
+            infoFont.setFontHeightInPoints((short) 10);
+            infoFont.setFontName("Calibri");
+            infoFont.setColor(IndexedColors.GREY_50_PERCENT.getIndex());
+            infoStyle.setFont(infoFont);
+            infoStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            Cell infoCell = infoRow.createCell(0);
+            infoCell.setCellValue("Generado el " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'a las' HH:mm")));
+            infoCell.setCellStyle(infoStyle);
+            sheet.addMergedRegion(new CellRangeAddress(8, 8, 0, 3));
+
+            // Resumen a la derecha
+            XSSFCellStyle summaryStyle = workbook.createCellStyle();
+            Font summaryFont = workbook.createFont();
+            summaryFont.setFontHeightInPoints((short) 9);
+            summaryFont.setFontName("Calibri");
+            summaryFont.setBold(true);
+            summaryStyle.setFont(summaryFont);
+            summaryStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            summaryStyle.setAlignment(HorizontalAlignment.CENTER);
+            summaryStyle.setFillForegroundColor(new XSSFColor(cAccentoBg, null));
+            summaryStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            summaryStyle.setBorderBottom(BorderStyle.THIN);
+            summaryStyle.setBorderTop(BorderStyle.THIN);
+            summaryStyle.setBorderLeft(BorderStyle.THIN);
+            summaryStyle.setBorderRight(BorderStyle.THIN);
+            summaryStyle.setBottomBorderColor(new XSSFColor(cBordeLight, null));
+            summaryStyle.setTopBorderColor(new XSSFColor(cBordeLight, null));
+            summaryStyle.setLeftBorderColor(new XSSFColor(cBordeLight, null));
+            summaryStyle.setRightBorderColor(new XSSFColor(cBordeLight, null));
+
+            Cell s5 = infoRow.createCell(4); s5.setCellValue("Total: " + servicios.size()); s5.setCellStyle(summaryStyle);
+            Cell s6 = infoRow.createCell(5); s6.setCellValue("Abiertos: " + countAbiertos); s6.setCellStyle(summaryStyle);
+            Cell s7 = infoRow.createCell(6); s7.setCellValue("Proceso: " + countEnProceso); s7.setCellStyle(summaryStyle);
+            Cell s8 = infoRow.createCell(7); s8.setCellValue("Cotización: " + countCotizacion); s8.setCellStyle(summaryStyle);
+            Cell s9 = infoRow.createCell(8); s9.setCellValue("Cerrados: " + countCerrados); s9.setCellStyle(summaryStyle);
+
+            // Fila 9: espacio antes de la tabla
+            Row space2 = sheet.createRow(9);
+            space2.setHeightInPoints(8);
+
+            // ══════════ CABECERA DE TABLA ══════════
             XSSFCellStyle headerStyle = workbook.createCellStyle();
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
-            headerFont.setFontHeightInPoints((short) 11);
+            headerFont.setFontHeightInPoints((short) 10);
             headerFont.setFontName("Calibri");
             headerFont.setColor(IndexedColors.WHITE.getIndex());
             headerStyle.setFont(headerFont);
-            headerStyle.setFillForegroundColor(new XSSFColor(colorPrimario, null));
+            headerStyle.setFillForegroundColor(new XSSFColor(cPrimario, null));
             headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             headerStyle.setAlignment(HorizontalAlignment.CENTER);
             headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
@@ -245,146 +319,230 @@ public class ServicioController {
             headerStyle.setBorderTop(BorderStyle.THIN);
             headerStyle.setBorderLeft(BorderStyle.THIN);
             headerStyle.setBorderRight(BorderStyle.THIN);
+            headerStyle.setBottomBorderColor(new XSSFColor(cPrimario, null));
+            headerStyle.setTopBorderColor(new XSSFColor(cPrimario, null));
+            headerStyle.setLeftBorderColor(new XSSFColor(cPrimario, null));
+            headerStyle.setRightBorderColor(new XSSFColor(cPrimario, null));
 
-            String[] columnas = {"ID", "Título", "Tipo", "Ubicación", "Presupuesto", "Estado", "Cliente", "Contratista", "Fecha creación"};
-            Row headerRow = sheet.createRow(7);
-            headerRow.setHeightInPoints(28);
+            String[] columnas = {"#", "Título", "Tipo", "Ubicación", "Presupuesto", "Estado", "Cliente", "Contratista", "Fecha"};
+            Row headerRow = sheet.createRow(10);
+            headerRow.setHeightInPoints(30);
             for (int i = 0; i < columnas.length; i++) {
                 Cell cell = headerRow.createCell(i);
                 cell.setCellValue(columnas[i]);
                 cell.setCellStyle(headerStyle);
             }
 
-            // ── Estilos de datos ──
-            XSSFCellStyle dataStyle = workbook.createCellStyle();
-            Font dataFont = workbook.createFont();
-            dataFont.setFontHeightInPoints((short) 10);
-            dataFont.setFontName("Calibri");
-            dataStyle.setFont(dataFont);
-            dataStyle.setBorderBottom(BorderStyle.THIN);
-            dataStyle.setBorderTop(BorderStyle.THIN);
-            dataStyle.setBorderLeft(BorderStyle.THIN);
-            dataStyle.setBorderRight(BorderStyle.THIN);
-            dataStyle.setBottomBorderColor(new XSSFColor(colorBorde, null));
-            dataStyle.setTopBorderColor(new XSSFColor(colorBorde, null));
-            dataStyle.setLeftBorderColor(new XSSFColor(colorBorde, null));
-            dataStyle.setRightBorderColor(new XSSFColor(colorBorde, null));
-            dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-
-            // Estilo fila alterna
-            XSSFCellStyle altStyle = workbook.createCellStyle();
-            altStyle.cloneStyleFrom(dataStyle);
-            altStyle.setFillForegroundColor(new XSSFColor(colorGrisClaro, null));
-            altStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            // ══════════ ESTILOS DE DATOS ══════════
+            // Helper: crear estilo base de celda
+            XSSFCellStyle[] makeDataPair = new XSSFCellStyle[2]; // [normal, alt]
+            for (int p = 0; p < 2; p++) {
+                XSSFCellStyle ds = workbook.createCellStyle();
+                Font df = workbook.createFont();
+                df.setFontHeightInPoints((short) 10);
+                df.setFontName("Calibri");
+                ds.setFont(df);
+                ds.setBorderBottom(BorderStyle.THIN);
+                ds.setBorderTop(BorderStyle.THIN);
+                ds.setBorderLeft(BorderStyle.THIN);
+                ds.setBorderRight(BorderStyle.THIN);
+                ds.setBottomBorderColor(new XSSFColor(cBordeLight, null));
+                ds.setTopBorderColor(new XSSFColor(cBordeLight, null));
+                ds.setLeftBorderColor(new XSSFColor(cBordeLight, null));
+                ds.setRightBorderColor(new XSSFColor(cBordeLight, null));
+                ds.setVerticalAlignment(VerticalAlignment.CENTER);
+                if (p == 1) {
+                    ds.setFillForegroundColor(new XSSFColor(cGrisClaro, null));
+                    ds.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                }
+                makeDataPair[p] = ds;
+            }
 
             // Estilo moneda
-            XSSFCellStyle moneyStyle = workbook.createCellStyle();
-            moneyStyle.cloneStyleFrom(dataStyle);
-            moneyStyle.setDataFormat(dataFormat.getFormat("$#,##0.00"));
-            moneyStyle.setAlignment(HorizontalAlignment.RIGHT);
-
-            XSSFCellStyle moneyAltStyle = workbook.createCellStyle();
-            moneyAltStyle.cloneStyleFrom(altStyle);
-            moneyAltStyle.setDataFormat(dataFormat.getFormat("$#,##0.00"));
-            moneyAltStyle.setAlignment(HorizontalAlignment.RIGHT);
+            XSSFCellStyle[] moneyPair = new XSSFCellStyle[2];
+            for (int p = 0; p < 2; p++) {
+                XSSFCellStyle ms = workbook.createCellStyle();
+                ms.cloneStyleFrom(makeDataPair[p]);
+                ms.setDataFormat(fmt.getFormat("$#,##0.00"));
+                ms.setAlignment(HorizontalAlignment.RIGHT);
+                Font mf = workbook.createFont();
+                mf.setFontHeightInPoints((short) 10);
+                mf.setFontName("Calibri");
+                mf.setBold(true);
+                ms.setFont(mf);
+                moneyPair[p] = ms;
+            }
 
             // Estilo ID centrado
-            XSSFCellStyle idStyle = workbook.createCellStyle();
-            idStyle.cloneStyleFrom(dataStyle);
-            idStyle.setAlignment(HorizontalAlignment.CENTER);
+            XSSFCellStyle[] idPair = new XSSFCellStyle[2];
+            for (int p = 0; p < 2; p++) {
+                XSSFCellStyle is = workbook.createCellStyle();
+                is.cloneStyleFrom(makeDataPair[p]);
+                is.setAlignment(HorizontalAlignment.CENTER);
+                Font idf = workbook.createFont();
+                idf.setFontHeightInPoints((short) 10);
+                idf.setFontName("Calibri");
+                idf.setColor(IndexedColors.GREY_50_PERCENT.getIndex());
+                is.setFont(idf);
+                idPair[p] = is;
+            }
 
-            XSSFCellStyle idAltStyle = workbook.createCellStyle();
-            idAltStyle.cloneStyleFrom(altStyle);
-            idAltStyle.setAlignment(HorizontalAlignment.CENTER);
+            // Estilo fecha centrado
+            XSSFCellStyle[] datePair = new XSSFCellStyle[2];
+            for (int p = 0; p < 2; p++) {
+                XSSFCellStyle ds = workbook.createCellStyle();
+                ds.cloneStyleFrom(makeDataPair[p]);
+                ds.setAlignment(HorizontalAlignment.CENTER);
+                datePair[p] = ds;
+            }
 
-            // ── Datos ──
-            int rowIdx = 8;
-            double totalPresupuesto = 0;
+            // Estilos para estados con colores
+            java.util.Map<String, XSSFCellStyle[]> estadoStyles = new java.util.HashMap<>();
+            Object[][] estadoColores = {
+                {"ABIERTO", cWarningBg, cWarning},
+                {"EN_COTIZACION", cSecBg, cSecondary},
+                {"EN_PROCESO", cAccentoBg, cAccento},
+                {"CERRADO", cSuccessBg, cSuccess}
+            };
+            for (Object[] ec : estadoColores) {
+                XSSFCellStyle[] pair = new XSSFCellStyle[2];
+                for (int p = 0; p < 2; p++) {
+                    XSSFCellStyle es = workbook.createCellStyle();
+                    es.cloneStyleFrom(makeDataPair[p]);
+                    es.setFillForegroundColor(new XSSFColor((byte[]) ec[1], null));
+                    es.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                    es.setAlignment(HorizontalAlignment.CENTER);
+                    Font ef = workbook.createFont();
+                    ef.setFontHeightInPoints((short) 9);
+                    ef.setFontName("Calibri");
+                    ef.setBold(true);
+                    ef.setColor(new XSSFColor((byte[]) ec[2], null).getIndex());
+                    es.setFont(ef);
+                    pair[p] = es;
+                }
+                estadoStyles.put((String) ec[0], pair);
+            }
+
+            // ══════════ DATOS ══════════
+            int rowIdx = 11;
             for (int idx = 0; idx < servicios.size(); idx++) {
                 Servicio s = servicios.get(idx);
                 Row row = sheet.createRow(rowIdx++);
-                row.setHeightInPoints(24);
-                boolean esAlt = idx % 2 == 1;
-                CellStyle cs = esAlt ? altStyle : dataStyle;
-                CellStyle ms = esAlt ? moneyAltStyle : moneyStyle;
-                CellStyle is = esAlt ? idAltStyle : idStyle;
+                row.setHeightInPoints(26);
+                int p = idx % 2;
 
-                Cell c0 = row.createCell(0); c0.setCellValue(s.getId()); c0.setCellStyle(is);
-                Cell c1 = row.createCell(1); c1.setCellValue(s.getTitulo()); c1.setCellStyle(cs);
-                Cell c2 = row.createCell(2); c2.setCellValue(s.getTipo() != null ? s.getTipo().getDisplayName() : ""); c2.setCellStyle(cs);
-                Cell c3 = row.createCell(3); c3.setCellValue(s.getUbicacion()); c3.setCellStyle(cs);
+                Cell c0 = row.createCell(0); c0.setCellValue(s.getId()); c0.setCellStyle(idPair[p]);
+                Cell c1 = row.createCell(1); c1.setCellValue(s.getTitulo()); c1.setCellStyle(makeDataPair[p]);
+                Cell c2 = row.createCell(2); c2.setCellValue(s.getTipo() != null ? s.getTipo().getDisplayName() : ""); c2.setCellStyle(makeDataPair[p]);
+                Cell c3 = row.createCell(3); c3.setCellValue(s.getUbicacion()); c3.setCellStyle(makeDataPair[p]);
 
                 double presupuesto = s.getPresupuesto() != null ? s.getPresupuesto().doubleValue() : 0;
-                totalPresupuesto += presupuesto;
-                Cell c4 = row.createCell(4); c4.setCellValue(presupuesto); c4.setCellStyle(ms);
+                Cell c4 = row.createCell(4); c4.setCellValue(presupuesto); c4.setCellStyle(moneyPair[p]);
 
-                Cell c5 = row.createCell(5); c5.setCellValue(s.getEstado() != null ? s.getEstado().name() : ""); c5.setCellStyle(cs);
-                Cell c6 = row.createCell(6); c6.setCellValue(s.getCliente() != null ? s.getCliente().getNombre() : ""); c6.setCellStyle(cs);
-                Cell c7 = row.createCell(7); c7.setCellValue(s.getContratistaAsignado() != null ? s.getContratistaAsignado().getNombre() : ""); c7.setCellStyle(cs);
-                Cell c8 = row.createCell(8); c8.setCellValue(s.getFechaCreacion() != null ? s.getFechaCreacion().format(dtf) : ""); c8.setCellStyle(cs);
+                String estadoName = s.getEstado() != null ? s.getEstado().name() : "";
+                Cell c5 = row.createCell(5);
+                c5.setCellValue(estadoName.replace("_", " "));
+                XSSFCellStyle[] estPair = estadoStyles.get(estadoName);
+                c5.setCellStyle(estPair != null ? estPair[p] : makeDataPair[p]);
+
+                Cell c6 = row.createCell(6); c6.setCellValue(s.getCliente() != null ? s.getCliente().getNombre() : ""); c6.setCellStyle(makeDataPair[p]);
+                Cell c7 = row.createCell(7); c7.setCellValue(s.getContratistaAsignado() != null ? s.getContratistaAsignado().getNombre() : "Sin asignar"); c7.setCellStyle(makeDataPair[p]);
+                Cell c8 = row.createCell(8); c8.setCellValue(s.getFechaCreacion() != null ? s.getFechaCreacion().format(dtf) : ""); c8.setCellStyle(datePair[p]);
             }
 
-            // ── Fila de totales ──
+            // ══════════ FILA DE TOTALES ══════════
             Row totalRow = sheet.createRow(rowIdx);
-            totalRow.setHeightInPoints(28);
-            XSSFCellStyle totalLabelStyle = workbook.createCellStyle();
+            totalRow.setHeightInPoints(32);
+
+            XSSFCellStyle totalStyle = workbook.createCellStyle();
             Font totalFont = workbook.createFont();
             totalFont.setBold(true);
             totalFont.setFontHeightInPoints((short) 11);
             totalFont.setFontName("Calibri");
-            totalLabelStyle.setFont(totalFont);
-            totalLabelStyle.setFillForegroundColor(new XSSFColor(new byte[]{(byte) 241, (byte) 245, (byte) 249}, null));
-            totalLabelStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            totalLabelStyle.setBorderBottom(BorderStyle.MEDIUM);
-            totalLabelStyle.setBorderTop(BorderStyle.MEDIUM);
-            totalLabelStyle.setBorderLeft(BorderStyle.THIN);
-            totalLabelStyle.setBorderRight(BorderStyle.THIN);
-            totalLabelStyle.setAlignment(HorizontalAlignment.RIGHT);
-            totalLabelStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            totalFont.setColor(IndexedColors.WHITE.getIndex());
+            totalStyle.setFont(totalFont);
+            totalStyle.setFillForegroundColor(new XSSFColor(cTotalBg, null));
+            totalStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            totalStyle.setBorderBottom(BorderStyle.MEDIUM);
+            totalStyle.setBorderTop(BorderStyle.MEDIUM);
+            totalStyle.setBorderLeft(BorderStyle.THIN);
+            totalStyle.setBorderRight(BorderStyle.THIN);
+            totalStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 
-            XSSFCellStyle totalValueStyle = workbook.createCellStyle();
-            totalValueStyle.cloneStyleFrom(totalLabelStyle);
-            totalValueStyle.setDataFormat(dataFormat.getFormat("$#,##0.00"));
+            XSSFCellStyle totalRightStyle = workbook.createCellStyle();
+            totalRightStyle.cloneStyleFrom(totalStyle);
+            totalRightStyle.setAlignment(HorizontalAlignment.RIGHT);
 
-            // Celdas vacías con estilo
+            XSSFCellStyle totalMoneyStyle = workbook.createCellStyle();
+            totalMoneyStyle.cloneStyleFrom(totalStyle);
+            totalMoneyStyle.setDataFormat(fmt.getFormat("$#,##0.00"));
+            totalMoneyStyle.setAlignment(HorizontalAlignment.RIGHT);
+
+            XSSFCellStyle totalCenterStyle = workbook.createCellStyle();
+            totalCenterStyle.cloneStyleFrom(totalStyle);
+            totalCenterStyle.setAlignment(HorizontalAlignment.CENTER);
+
             for (int i = 0; i < numCols; i++) {
                 Cell tc = totalRow.createCell(i);
-                tc.setCellStyle(totalLabelStyle);
+                tc.setCellStyle(totalStyle);
             }
-            totalRow.getCell(3).setCellValue("TOTAL:");
-            Cell totalValueCell = totalRow.getCell(4);
-            totalValueCell.setCellValue(totalPresupuesto);
-            totalValueCell.setCellStyle(totalValueStyle);
-            totalRow.getCell(5).setCellValue(servicios.size() + " servicios");
+            totalRow.getCell(2).setCellValue(servicios.size() + " servicios");
+            totalRow.getCell(2).setCellStyle(totalCenterStyle);
+            totalRow.getCell(3).setCellValue("TOTAL");
+            totalRow.getCell(3).setCellStyle(totalRightStyle);
+            totalRow.getCell(4).setCellValue(totalPresupuesto);
+            totalRow.getCell(4).setCellStyle(totalMoneyStyle);
 
-            // ── Autoajustar columnas ──
-            for (int i = 0; i < numCols; i++) {
-                sheet.autoSizeColumn(i);
-                // Ancho mínimo
-                if (sheet.getColumnWidth(i) < 3500) sheet.setColumnWidth(i, 3500);
-            }
-            // Columna título más ancha
-            if (sheet.getColumnWidth(1) < 8000) sheet.setColumnWidth(1, 8000);
+            // ══════════ PIE DE PÁGINA ══════════
+            Row footerSpace = sheet.createRow(rowIdx + 1);
+            footerSpace.setHeightInPoints(12);
 
-            // ── Pie de página ──
             Row footerRow = sheet.createRow(rowIdx + 2);
-            CellStyle footerStyle = workbook.createCellStyle();
+            footerRow.setHeightInPoints(20);
+
+            // Línea de acento en footer
+            Row footerAccent = sheet.createRow(rowIdx + 3);
+            footerAccent.setHeightInPoints(3);
+            for (int i = 0; i < 3; i++) {
+                Cell c = footerAccent.createCell(i);
+                c.setCellStyle(accentStyle);
+            }
+
+            XSSFCellStyle footerStyle = workbook.createCellStyle();
             Font footerFont = workbook.createFont();
             footerFont.setItalic(true);
             footerFont.setFontHeightInPoints((short) 9);
             footerFont.setColor(IndexedColors.GREY_50_PERCENT.getIndex());
             footerFont.setFontName("Calibri");
             footerStyle.setFont(footerFont);
+            footerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
             Cell footerCell = footerRow.createCell(0);
-            footerCell.setCellValue("BRIXO — Tu obra, nuestro compromiso");
+            footerCell.setCellValue("BRIXO  —  Tu obra, nuestro compromiso  |  www.brixo.com");
             footerCell.setCellStyle(footerStyle);
             sheet.addMergedRegion(new CellRangeAddress(rowIdx + 2, rowIdx + 2, 0, numCols - 1));
+
+            // ══════════ ANCHOS DE COLUMNA ══════════
+            sheet.setColumnWidth(0, 2000);   // #
+            sheet.setColumnWidth(1, 9000);   // Título
+            sheet.setColumnWidth(2, 4500);   // Tipo
+            sheet.setColumnWidth(3, 5000);   // Ubicación
+            sheet.setColumnWidth(4, 5000);   // Presupuesto
+            sheet.setColumnWidth(5, 5000);   // Estado
+            sheet.setColumnWidth(6, 5500);   // Cliente
+            sheet.setColumnWidth(7, 5500);   // Contratista
+            sheet.setColumnWidth(8, 5500);   // Fecha
+
+            // Configurar impresión
+            sheet.setFitToPage(true);
+            sheet.getPrintSetup().setFitWidth((short) 1);
+            sheet.getPrintSetup().setFitHeight((short) 0);
+            sheet.getPrintSetup().setLandscape(true);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=servicios-reporte.xlsx")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=brixo-servicios-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xlsx")
                     .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                     .body(out.toByteArray());
         }
