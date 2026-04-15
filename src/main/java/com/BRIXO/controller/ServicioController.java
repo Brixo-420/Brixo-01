@@ -173,11 +173,11 @@ public class ServicioController {
             // ── Insertar logo ──
             int logoRowStart = 0;
             try {
-                ClassPathResource logoRes = new ClassPathResource("static/images/logo-brixo.png");
+                ClassPathResource logoRes = new ClassPathResource("static/images/logo empresa brixo.jpg");
                 if (logoRes.exists()) {
                     try (InputStream logoStream = logoRes.getInputStream()) {
                         byte[] logoBytes = IOUtils.toByteArray(logoStream);
-                        int pictureIdx = workbook.addPicture(logoBytes, Workbook.PICTURE_TYPE_PNG);
+                        int pictureIdx = workbook.addPicture(logoBytes, Workbook.PICTURE_TYPE_JPEG);
                         XSSFDrawing drawing = (XSSFDrawing) sheet.createDrawingPatriarch();
                         XSSFClientAnchor anchor = new XSSFClientAnchor(0, 0, 0, 0, 0, 0, 3, 4);
                         anchor.setAnchorType(XSSFClientAnchor.AnchorType.MOVE_AND_RESIZE);
