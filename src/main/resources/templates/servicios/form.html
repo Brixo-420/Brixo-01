@@ -7,185 +7,221 @@
     <title>Formulario Servicio | Brixo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/design-system.css}">
     <link rel="stylesheet" th:href="@{/css/brixo.css}">
     <style>
-        .form-control:invalid {
-            border-color: #dc3545;
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --secondary: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #e2e8f0;
         }
-        .form-control:valid {
-            border-color: #28a745;
+        * { box-sizing: border-box; }
+        html, body { margin:0; padding:0; font-family:"Plus Jakarta Sans",sans-serif; background:var(--bg); color:var(--text); }
+
+        .page-wrap { max-width:820px; margin:0 auto; padding:90px 1.5rem 3rem; }
+
+        .page-header { margin-bottom:1.5rem; }
+        .page-header h1 { font-size:1.5rem; font-weight:800; margin:0; display:flex; align-items:center; gap:.6rem; }
+        .page-header h1 i { color:var(--primary); }
+        .page-header p { color:var(--muted); margin:.3rem 0 0; font-size:.92rem; }
+
+        .form-card { background:var(--card); border-radius:16px; border:1px solid var(--border); box-shadow:0 4px 16px rgba(15,23,42,.06); overflow:hidden; }
+        .form-card-top { height:5px; background:linear-gradient(90deg,var(--primary),var(--secondary)); }
+        .form-card-body { padding:2rem; }
+
+        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+        .form-grid .full { grid-column:1/-1; }
+
+        .field-group { display:flex; flex-direction:column; }
+        .field-label { font-size:.82rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:.4rem; display:flex; align-items:center; gap:.3rem; }
+        .field-label .req { color:var(--danger); }
+        .field-hint { font-size:.78rem; color:var(--muted); margin-top:.25rem; }
+
+        .field-input, .field-select, .field-textarea {
+            border:1.5px solid var(--border); border-radius:10px; padding:.65rem .9rem; font:inherit; font-size:.92rem;
+            width:100%; transition:all .25s; background:#fff;
         }
-        .error-message {
-            color: #dc3545;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-            display: none;
-        }
-        .error-message.show {
-            display: block;
+        .field-input:focus, .field-select:focus, .field-textarea:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(14,165,233,.12); }
+        .field-input.is-invalid, .field-select.is-invalid, .field-textarea.is-invalid { border-color:var(--danger); }
+        .field-input.is-valid, .field-select.is-valid, .field-textarea.is-valid { border-color:var(--success); }
+
+        .field-textarea { resize:vertical; min-height:120px; }
+        .field-error { color:var(--danger); font-size:.8rem; margin-top:.25rem; display:none; }
+        .field-error.show { display:block; }
+
+        .form-actions { display:flex; gap:.6rem; padding-top:1.5rem; border-top:1px solid var(--border); margin-top:1.5rem; }
+
+        .btn-bx { border:none; border-radius:10px; padding:.65rem 1.3rem; font-weight:700; cursor:pointer; text-decoration:none; font-size:.9rem; transition:all .25s; display:inline-flex; align-items:center; gap:.4rem; }
+        .btn-bx:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,.12); }
+        .btn-bx-primary { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; }
+        .btn-bx-primary:hover { color:#fff; }
+        .btn-bx-outline { background:transparent; border:1.5px solid var(--border); color:var(--text); }
+        .btn-bx-outline:hover { border-color:var(--primary); color:var(--primary); }
+
+        .bx-alert-err { border-radius:10px; padding:.7rem 1rem; font-weight:600; font-size:.9rem; margin-bottom:1.2rem; background:rgba(239,68,68,.1); color:#b91c1c; border:1px solid rgba(239,68,68,.2); display:flex; align-items:center; gap:.5rem; }
+
+        @media (max-width:640px) {
+            .form-grid { grid-template-columns:1fr; }
+            .form-card-body { padding:1.2rem; }
         }
     </style>
 </head>
-<body style="padding-top:70px;background:#f8fafc">
+<body>
 <div th:replace="~{fragments/navbar :: navbar(overlay=false)}"></div>
 
-<div class="container">
-    <h1 class="h3 mb-3" th:text="${servicio.id == null} ? 'Nuevo servicio' : 'Editar servicio'"></h1>
+<div class="page-wrap">
 
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div class="page-header">
+        <h1>
+            <i class="fas" th:classappend="${servicio.id == null} ? 'fa-plus-circle' : 'fa-edit'"></i>
+            <span th:text="${servicio.id == null} ? 'Publicar nuevo servicio' : 'Editar servicio'"></span>
+        </h1>
+        <p th:if="${servicio.id == null}">Describe el trabajo que necesitas y conecta con profesionales.</p>
+        <p th:if="${servicio.id != null}">Modifica los datos de tu servicio publicado.</p>
+    </div>
 
-    <form id="servicioForm" novalidate
-          th:action="${servicio.id == null} ? @{/servicios} : @{/servicios/{id}(id=${servicio.id})}"
-          th:object="${servicio}" method="post" class="card card-body shadow-sm">
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label" for="tipo">Tipo de Servicio <span class="text-danger">*</span></label>
-                <select id="tipo" name="tipo" th:field="*{tipo}" class="form-select" required>
-                    <option value="">Selecciona un tipo de servicio</option>
-                    <option th:each="t : ${T(com.BRIXO.model.TipoServicio).values()}" 
-                            th:value="${t}" th:text="${t.displayName}"></option>
-                </select>
-                <div class="error-message" id="tipoError">Por favor selecciona un tipo de servicio</div>
-                <div class="text-danger small" th:if="${#fields.hasErrors('tipo')}" th:errors="*{tipo}"></div>
-            </div>
-            
-            <div class="col-md-6">
-                <label class="form-label" for="titulo">Titulo <span class="text-danger">*</span></label>
-                <input id="titulo" type="text" th:field="*{titulo}" class="form-control" 
-                       required minlength="3" maxlength="120" 
-                       placeholder="Ej: Reparar tubería de cocina">
-                <small class="text-muted">Mínimo 3 caracteres, máximo 120</small>
-                <div class="error-message" id="tituloError">El título es requerido y debe tener entre 3 y 120 caracteres</div>
-                <div class="text-danger small" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></div>
-            </div>
-            
-            <div class="col-md-6">
-                <label class="form-label" for="ubicacion">Ubicación <span class="text-danger">*</span></label>
-                <input id="ubicacion" type="text" th:field="*{ubicacion}" class="form-control" 
-                       required minlength="3" maxlength="120" 
-                       placeholder="Ej: Calle Principal 123, Apartamento 5B">
-                <small class="text-muted">Mínimo 3 caracteres, máximo 120</small>
-                <div class="error-message" id="ubicacionError">La ubicación es requerida y debe tener entre 3 y 120 caracteres</div>
-                <div class="text-danger small" th:if="${#fields.hasErrors('ubicacion')}" th:errors="*{ubicacion}"></div>
-            </div>
-            
-            <div class="col-md-6">
-                <label class="form-label" for="presupuesto">Presupuesto <span class="text-danger">*</span></label>
-                <input id="presupuesto" type="number" th:field="*{presupuesto}" class="form-control" 
-                       required min="0.01" step="0.01" placeholder="Ej: 150.50">
-                <small class="text-muted">Debe ser mayor a 0</small>
-                <div class="error-message" id="presupuestoError">El presupuesto es requerido y debe ser mayor a 0</div>
-                <div class="text-danger small" th:if="${#fields.hasErrors('presupuesto')}" th:errors="*{presupuesto}"></div>
-            </div>
-            
-            <div class="col-md-6" sec:authorize="hasRole('ROLE_ADMIN')">
-                <label class="form-label" for="estado">Estado <span class="text-danger">*</span></label>
-                <select id="estado" th:field="*{estado}" class="form-select" required>
-                    <option value="">Selecciona un estado</option>
-                    <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"></option>
-                </select>
-                <div class="error-message" id="estadoError">El estado es requerido</div>
-                <div class="text-danger small" th:if="${#fields.hasErrors('estado')}" th:errors="*{estado}"></div>
-            </div>
-            
-            <!-- Campo oculto para preservar el estado cuando no es ADMIN -->
-            <div sec:authorize="!hasRole('ROLE_ADMIN')" style="display: none;">
-                <input type="hidden" th:field="*{estado}">
-            </div>
-            
-            <div class="col-12">
-                <label class="form-label" for="descripcion">Descripción <span class="text-danger">*</span></label>
-                <textarea id="descripcion" th:field="*{descripcion}" class="form-control" 
-                          required minlength="10" maxlength="500" rows="4"
-                          placeholder="Describe en detalle el servicio que necesitas..."></textarea>
-                <small class="text-muted">Mínimo 10 caracteres, máximo 500</small>
-                <div class="error-message" id="descripcionError">La descripción es requerida y debe tener entre 10 y 500 caracteres</div>
-                <div class="text-danger small" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></div>
-            </div>
+    <div th:if="${error}" class="bx-alert-err"><i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span></div>
+
+    <div class="form-card">
+        <div class="form-card-top"></div>
+        <div class="form-card-body">
+            <form id="servicioForm" novalidate
+                  th:action="${servicio.id == null} ? @{/servicios} : @{/servicios/{id}(id=${servicio.id})}"
+                  th:object="${servicio}" method="post">
+
+                <div class="form-grid">
+                    <!-- Tipo -->
+                    <div class="field-group">
+                        <label class="field-label"><i class="fas fa-tag"></i> Tipo de servicio <span class="req">*</span></label>
+                        <select id="tipo" name="tipo" th:field="*{tipo}" class="field-select" required>
+                            <option value="">Selecciona un tipo</option>
+                            <option th:each="t : ${T(com.BRIXO.model.TipoServicio).values()}" th:value="${t}" th:text="${t.displayName}"></option>
+                        </select>
+                        <div class="field-error" id="tipoError">Selecciona un tipo de servicio</div>
+                        <div class="text-danger small" th:if="${#fields.hasErrors('tipo')}" th:errors="*{tipo}"></div>
+                    </div>
+
+                    <!-- Título -->
+                    <div class="field-group">
+                        <label class="field-label"><i class="fas fa-heading"></i> Título <span class="req">*</span></label>
+                        <input id="titulo" type="text" th:field="*{titulo}" class="field-input" required minlength="3" maxlength="120" placeholder="Ej: Reparar tubería de cocina">
+                        <span class="field-hint">3 - 120 caracteres</span>
+                        <div class="field-error" id="tituloError">El título debe tener entre 3 y 120 caracteres</div>
+                        <div class="text-danger small" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></div>
+                    </div>
+
+                    <!-- Ubicación -->
+                    <div class="field-group">
+                        <label class="field-label"><i class="fas fa-map-marker-alt"></i> Ubicación <span class="req">*</span></label>
+                        <input id="ubicacion" type="text" th:field="*{ubicacion}" class="field-input" required minlength="3" maxlength="120" placeholder="Ej: Calle Principal 123">
+                        <span class="field-hint">3 - 120 caracteres</span>
+                        <div class="field-error" id="ubicacionError">La ubicación debe tener entre 3 y 120 caracteres</div>
+                        <div class="text-danger small" th:if="${#fields.hasErrors('ubicacion')}" th:errors="*{ubicacion}"></div>
+                    </div>
+
+                    <!-- Presupuesto -->
+                    <div class="field-group">
+                        <label class="field-label"><i class="fas fa-dollar-sign"></i> Presupuesto <span class="req">*</span></label>
+                        <input id="presupuesto" type="number" th:field="*{presupuesto}" class="field-input" required min="0.01" step="0.01" placeholder="150.00">
+                        <span class="field-hint">Mayor a $0</span>
+                        <div class="field-error" id="presupuestoError">El presupuesto debe ser mayor a 0</div>
+                        <div class="text-danger small" th:if="${#fields.hasErrors('presupuesto')}" th:errors="*{presupuesto}"></div>
+                    </div>
+
+                    <!-- Estado (solo admin) -->
+                    <div class="field-group" sec:authorize="hasRole('ROLE_ADMIN')">
+                        <label class="field-label"><i class="fas fa-flag"></i> Estado <span class="req">*</span></label>
+                        <select id="estado" th:field="*{estado}" class="field-select" required>
+                            <option value="">Selecciona un estado</option>
+                            <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"></option>
+                        </select>
+                        <div class="field-error" id="estadoError">El estado es requerido</div>
+                        <div class="text-danger small" th:if="${#fields.hasErrors('estado')}" th:errors="*{estado}"></div>
+                    </div>
+                    <div sec:authorize="!hasRole('ROLE_ADMIN')" style="display:none">
+                        <input type="hidden" th:field="*{estado}">
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="field-group full">
+                        <label class="field-label"><i class="fas fa-align-left"></i> Descripción <span class="req">*</span></label>
+                        <textarea id="descripcion" th:field="*{descripcion}" class="field-textarea" required minlength="10" maxlength="500" placeholder="Describe en detalle el trabajo que necesitas..."></textarea>
+                        <span class="field-hint">10 - 500 caracteres</span>
+                        <div class="field-error" id="descripcionError">La descripción debe tener entre 10 y 500 caracteres</div>
+                        <div class="text-danger small" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-bx btn-bx-primary">
+                        <i class="fas" th:classappend="${servicio.id == null} ? 'fa-paper-plane' : 'fa-save'"></i>
+                        <span th:text="${servicio.id == null} ? 'Publicar servicio' : 'Guardar cambios'"></span>
+                    </button>
+                    <button type="reset" class="btn-bx btn-bx-outline"><i class="fas fa-undo"></i> Limpiar</button>
+                    <a th:href="@{/servicios}" class="btn-bx btn-bx-outline"><i class="fas fa-arrow-left"></i> Cancelar</a>
+                </div>
+            </form>
         </div>
-
-        <div class="mt-4 d-flex gap-2">
-            <button type="submit" class="btn btn-dark">Guardar</button>
-            <button type="reset" class="btn btn-outline-secondary">Limpiar</button>
-            <a th:href="@{/servicios}" class="btn btn-outline-secondary">Cancelar</a>
-        </div>
-    </form>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Validación con Bootstrap nativa
-    (function() {
-        'use strict';
-        const form = document.getElementById('servicioForm');
-        
-        if (form) {
-            form.addEventListener('submit', function(event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    showErrorMessages();
-                }
-                form.classList.add('was-validated');
-            }, false);
+(function() {
+    'use strict';
+    const form = document.getElementById('servicioForm');
+    if (!form) return;
 
-            // Validación en tiempo real
-            const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
-            inputs.forEach(input => {
-                input.addEventListener('blur', validateField);
-                input.addEventListener('input', validateField);
-                input.addEventListener('change', validateField);
-            });
+    form.addEventListener('submit', function(e) {
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+            showErrors();
         }
+        form.classList.add('was-validated');
+    });
 
-        function validateField(e) {
-            const field = e.target;
-            const errorElement = document.getElementById(field.id + 'Error');
-            
-            if (!field.checkValidity()) {
-                field.classList.add('is-invalid');
-                field.classList.remove('is-valid');
-                if (errorElement) {
-                    errorElement.classList.add('show');
-                }
-            } else {
-                field.classList.remove('is-invalid');
-                field.classList.add('is-valid');
-                if (errorElement) {
-                    errorElement.classList.remove('show');
-                }
+    form.querySelectorAll('input[required],textarea[required],select[required]').forEach(el => {
+        el.addEventListener('blur', validate);
+        el.addEventListener('input', validate);
+        el.addEventListener('change', validate);
+    });
+
+    function validate(e) {
+        const f = e.target;
+        const err = document.getElementById(f.id + 'Error');
+        if (!f.checkValidity()) {
+            f.classList.add('is-invalid');
+            f.classList.remove('is-valid');
+            if (err) err.classList.add('show');
+        } else {
+            f.classList.remove('is-invalid');
+            f.classList.add('is-valid');
+            if (err) err.classList.remove('show');
+        }
+    }
+
+    function showErrors() {
+        form.querySelectorAll('input[required],textarea[required],select[required]').forEach(f => {
+            if (!f.checkValidity()) {
+                f.classList.add('is-invalid');
+                const err = document.getElementById(f.id + 'Error');
+                if (err) err.classList.add('show');
             }
-        }
-
-        function showErrorMessages() {
-            const form = document.getElementById('servicioForm');
-            const fields = form.querySelectorAll('input[required], textarea[required], select[required]');
-            
-            fields.forEach(field => {
-                if (!field.checkValidity()) {
-                    const errorElement = document.getElementById(field.id + 'Error');
-                    if (errorElement) {
-                        errorElement.classList.add('show');
-                    }
-                    field.classList.add('is-invalid');
-                } else {
-                    field.classList.remove('is-invalid');
-                }
-            });
-        }
-
-        // Mostrar tipos disponibles al click en select
-        const tipoSelect = document.getElementById('tipo');
-        if (tipoSelect) {
-            tipoSelect.addEventListener('click', function() {
-                console.log('Tipos de servicios disponibles:');
-                Array.from(this.options).forEach(opt => {
-                    if (opt.value) console.log('- ' + opt.text);
-                });
-            });
-        }
-    })();
+        });
+    }
+})();
 </script>
 <div th:replace="~{fragments/navbar :: navbarJs}"></div>
 </body>
