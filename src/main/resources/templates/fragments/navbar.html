@@ -20,8 +20,6 @@
         <!-- Links centro -->
         <ul class="bn__menu" id="bnMenu">
             <li><a th:href="@{/servicios}"   class="bn__link">Explorar</a></li>
-            <li><a th:href="@{/map}"          class="bn__link">Explorar mapa</a></li>
-            <li><a th:href="@{/cotizador}"    class="bn__link">Cotizador IA</a></li>
         </ul>
 
         <!-- Acciones derecha -->
@@ -72,8 +70,6 @@
     <div class="bn__mobile" id="bnMobile">
         <ul class="bn__mobile-links">
             <li><a th:href="@{/servicios}"><i class="fas fa-search"></i> Explorar</a></li>
-            <li><a th:href="@{/map}"><i class="fas fa-map-marked-alt"></i> Explorar mapa</a></li>
-            <li><a th:href="@{/cotizador}"><i class="fas fa-robot"></i> Cotizador IA</a></li>
         </ul>
         <div class="bn__mobile-divider"></div>
         <div sec:authorize="isAuthenticated()">
