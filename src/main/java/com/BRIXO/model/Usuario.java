@@ -42,6 +42,14 @@ public class Usuario {
     @Column(length = 20)
     private String telefono;
 
+    @Size(max = 200, message = "La dirección no puede superar 200 caracteres")
+    @Column(length = 200)
+    private String direccion;
+
+    @Size(max = 100, message = "La ciudad no puede superar 100 caracteres")
+    @Column(length = 100)
+    private String ciudad;
+
     @Column(nullable = false, length = 120)
     private String password;
 

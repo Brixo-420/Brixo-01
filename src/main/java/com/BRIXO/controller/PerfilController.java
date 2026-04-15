@@ -35,13 +35,15 @@ public class PerfilController {
             @RequestParam String nombre,
             @RequestParam String email,
             @RequestParam(required = false) String telefono,
+            @RequestParam(required = false) String direccion,
+            @RequestParam(required = false) String ciudad,
             @RequestParam(required = false) String password,
             Authentication authentication,
             RedirectAttributes redirectAttributes
     ) {
         try {
             String emailActual = authentication.getName();
-            Usuario actualizado = usuarioService.actualizarPerfil(emailActual, nombre, email, telefono, password);
+            Usuario actualizado = usuarioService.actualizarPerfil(emailActual, nombre, email, telefono, direccion, ciudad, password);
 
             // Si cambió el email, actualizar el SecurityContext
             if (!emailActual.equals(actualizado.getEmail())) {

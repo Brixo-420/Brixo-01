@@ -184,6 +184,14 @@
                         <i class="fas fa-phone"></i>
                         <span th:text="${u.telefono}"></span>
                     </div>
+                    <div class="user-meta-item" th:if="${u.ciudad != null and !u.ciudad.isEmpty()}">
+                        <i class="fas fa-city"></i>
+                        <span th:text="${u.ciudad}"></span>
+                    </div>
+                    <div class="user-meta-item" th:if="${u.direccion != null and !u.direccion.isEmpty()}">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span th:text="${u.direccion}"></span>
+                    </div>
                 </div>
             </div>
             <div class="user-card-actions">

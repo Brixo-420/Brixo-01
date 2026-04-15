@@ -120,6 +120,22 @@
                     </div>
 
                     <div class="field">
+                        <label for="ciudad"><i class="fas fa-city"></i> Ciudad</label>
+                        <input id="ciudad" type="text" th:field="*{ciudad}" maxlength="100" placeholder="Ej: Ciudad de México">
+                        <div class="hint">Opcional</div>
+                        <div class="err" id="ciudadError">La ciudad no puede superar 100 caracteres</div>
+                        <div class="err show" th:if="${#fields.hasErrors('ciudad')}" th:errors="*{ciudad}"></div>
+                    </div>
+
+                    <div class="field" style="grid-column:1/-1">
+                        <label for="direccion"><i class="fas fa-map-marker-alt"></i> Dirección</label>
+                        <input id="direccion" type="text" th:field="*{direccion}" maxlength="200" placeholder="Ej: Calle Principal 123, Col. Centro">
+                        <div class="hint">Opcional</div>
+                        <div class="err" id="direccionError">La dirección no puede superar 200 caracteres</div>
+                        <div class="err show" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></div>
+                    </div>
+
+                    <div class="field">
                         <label for="password">
                             <i class="fas fa-lock"></i> Contraseña
                             <span class="req" th:if="${usuario.id == null}">*</span>

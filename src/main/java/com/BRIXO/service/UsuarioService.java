@@ -62,6 +62,8 @@ public class UsuarioService {
         actual.setNombre(cambios.getNombre());
         actual.setEmail(cambios.getEmail());
         actual.setTelefono(cambios.getTelefono());
+        actual.setDireccion(cambios.getDireccion());
+        actual.setCiudad(cambios.getCiudad());
         actual.setRol(obtenerRol(rolId));
 
         if (cambios.getPassword() != null && !cambios.getPassword().isBlank()) {
@@ -96,7 +98,7 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario actualizarPerfil(String emailActual, String nuevoNombre, String nuevoEmail, String nuevoTelefono, String nuevaPassword) {
+    public Usuario actualizarPerfil(String emailActual, String nuevoNombre, String nuevoEmail, String nuevoTelefono, String nuevaDireccion, String nuevaCiudad, String nuevaPassword) {
         Usuario actual = buscarPorEmail(emailActual);
 
         if (!actual.getEmail().equals(nuevoEmail) && usuarioRepository.existsByEmail(nuevoEmail)) {
@@ -106,6 +108,8 @@ public class UsuarioService {
         actual.setNombre(nuevoNombre);
         actual.setEmail(nuevoEmail);
         actual.setTelefono(nuevoTelefono);
+        actual.setDireccion(nuevaDireccion);
+        actual.setCiudad(nuevaCiudad);
 
         if (nuevaPassword != null && !nuevaPassword.isBlank()) {
             if (nuevaPassword.length() < 6) {
