@@ -138,9 +138,10 @@ public class ServicioController {
     ) throws IOException {
         boolean esAdmin = tieneRol(authentication, "ROLE_ADMIN");
         boolean esCliente = tieneRol(authentication, "ROLE_CLIENTE");
+        boolean esContratista = tieneRol(authentication, "ROLE_CONTRATISTA");
 
         List<Servicio> servicios = servicioService.listarFiltrados(
-                titulo, estado, emailCliente, authentication.getName(), esAdmin, esCliente);
+                titulo, estado, emailCliente, authentication.getName(), esAdmin, esCliente, esContratista);
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
