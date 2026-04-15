@@ -33,6 +33,16 @@
                 </a>
             </div>
 
+            <!-- Botón Cambiar Rol (visible en barra) -->
+            <form th:if="${contratistaAprobado}" th:action="@{/cambiar-rol}" method="post" sec:authorize="isAuthenticated()" style="display:inline;margin:0">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="bn__btn" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;cursor:pointer;font:inherit;font-size:.85rem;font-weight:700;padding:.5rem 1rem;border-radius:10px;display:inline-flex;align-items:center;gap:.4rem;transition:all .3s;margin-right:.3rem" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(99,102,241,.35)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span sec:authorize="hasRole('ROLE_CLIENTE')">Ser Contratista</span>
+                    <span sec:authorize="hasRole('ROLE_CONTRATISTA')">Ser Cliente</span>
+                </button>
+            </form>
+
             <!-- Usuario autenticado -->
             <div class="bn__user" id="bnUser" sec:authorize="isAuthenticated()">
                 <button class="bn__user-toggle" id="bnUserToggle"
@@ -106,12 +116,12 @@
             <div class="bn__mobile-actions">
                 <a th:href="@{/dashboard}" class="bn__dropdown-item"><i class="fas fa-th-large"></i> Mi Panel</a>
                 <!-- Cambiar Rol (móvil) -->
-                <form th:if="${contratistaAprobado}" th:action="@{/cambiar-rol}" method="post" style="margin:0">
+                <form th:if="${contratistaAprobado}" th:action="@{/cambiar-rol}" method="post" style="margin:0;padding:8px 16px">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button type="submit" class="bn__dropdown-item" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;font:inherit;color:inherit;padding:inherit">
-                        <i class="fas fa-exchange-alt" style="color:#6366f1"></i>
-                        <span sec:authorize="hasRole('ROLE_CLIENTE')">Cambiar a Contratista</span>
-                        <span sec:authorize="hasRole('ROLE_CONTRATISTA')">Cambiar a Cliente</span>
+                    <button type="submit" style="width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;cursor:pointer;font:inherit;font-size:.85rem;font-weight:700;padding:.6rem 1rem;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:.4rem">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span sec:authorize="hasRole('ROLE_CLIENTE')">Ser Contratista</span>
+                        <span sec:authorize="hasRole('ROLE_CONTRATISTA')">Ser Cliente</span>
                     </button>
                 </form>
             </div>
