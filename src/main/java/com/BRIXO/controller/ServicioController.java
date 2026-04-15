@@ -34,7 +34,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Arrays;
@@ -73,49 +72,6 @@ public class ServicioController {
         model.addAttribute("esContratista", esContratista);
         return "servicios/lista";
     }
-
-        @GetMapping(value = "/reporte.csv", produces = "text/csv")
-        @ResponseBody
-        public ResponseEntity<byte[]> exportarCsv(
-            @RequestParam(required = false) String titulo,
-            @RequestParam(required = false) String estado,
-            @RequestParam(required = false) String emailCliente,
-            Authentication authentication
-        ) {
-        boolean esAdmin = tieneRol(authentication, "ROLE_ADMIN");
-        boolean esCliente = tieneRol(authentication, "ROLE_CLIENTE");
-
-        List<Servicio> servicios = servicioService.listarFiltrados(
-            titulo,
-            estado,
-            emailCliente,
-            authentication.getName(),
-            esAdmin,
-            esCliente
-        );
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        StringBuilder csv = new StringBuilder();
-        csv.append("id,titulo,descripcion,ubicacion,presupuesto,estado,clienteEmail,fechaCreacion\n");
-
-        for (Servicio servicio : servicios) {
-            csv.append(servicio.getId()).append(",")
-                .append(escaparCsv(servicio.getTitulo())).append(",")
-                .append(escaparCsv(servicio.getDescripcion())).append(",")
-                .append(escaparCsv(servicio.getUbicacion())).append(",")
-                .append(servicio.getPresupuesto()).append(",")
-                .append(servicio.getEstado()).append(",")
-                .append(escaparCsv(servicio.getCliente() != null ? servicio.getCliente().getEmail() : "")).append(",")
-                .append(servicio.getFechaCreacion() != null ? servicio.getFechaCreacion().format(formatter) : "")
-                .append("\n");
-        }
-
-        byte[] body = csv.toString().getBytes(StandardCharsets.UTF_8);
-        return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=servicios-reporte.csv")
-            .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
-            .body(body);
-        }
 
     @GetMapping("/nuevo")
     public String nuevo(
@@ -418,14 +374,6 @@ public class ServicioController {
 
     private boolean tieneRol(Authentication authentication, String rol) {
         return authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(rol));
-    }
-
-    private String escaparCsv(String value) {
-        if (value == null) {
-            return "\"\"";
-        }
-        String escaped = value.replace("\"", "\"\"");
-        return "\"" + escaped + "\"";
     }
 
 }

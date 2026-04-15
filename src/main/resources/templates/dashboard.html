@@ -472,6 +472,9 @@
             <a th:href="@{/servicios}">
                 <i class="fas fa-briefcase"></i> Servicios
             </a>
+            <a th:href="@{/notificaciones}">
+                <i class="fas fa-bell"></i> Notificaciones
+            </a>
             <a sec:authorize="hasRole('ROLE_CLIENTE')" th:href="@{/servicios/nuevo}">
                 <i class="fas fa-plus-circle"></i> Publicar tarea
             </a>
