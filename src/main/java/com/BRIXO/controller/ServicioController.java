@@ -123,7 +123,7 @@ public class ServicioController {
 
         Servicio servicio = new Servicio();
         if (tipo != null && !tipo.isBlank()) {
-            servicio.setTitulo(tipo);
+            servicio.setTipo(tipo);
         }
         
         model.addAttribute("servicio", servicio);

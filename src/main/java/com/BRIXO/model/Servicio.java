@@ -44,6 +44,10 @@ public class Servicio {
     @Column(nullable = false, length = 500)
     private String descripcion;
 
+    @Size(max = 50, message = "El tipo no puede superar 50 caracteres")
+    @Column(length = 50)
+    private String tipo;
+
     @NotBlank(message = "La ubicacion es obligatoria")
     @Size(max = 120, message = "La ubicacion no puede superar 120 caracteres")
     @Column(nullable = false, length = 120)

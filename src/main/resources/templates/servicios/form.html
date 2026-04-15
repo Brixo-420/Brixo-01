@@ -22,6 +22,11 @@
           th:object="${servicio}" method="post" class="card card-body shadow-sm">
         <div class="row g-3">
             <div class="col-md-6">
+                <label class="form-label" for="tipo">Tipo de Servicio</label>
+                <input id="tipo" type="text" th:field="*{tipo}" class="form-control" placeholder="Ej: Plomería, Carpintería...">
+                <div class="text-danger small" th:if="${#fields.hasErrors('tipo')}" th:errors="*{tipo}"></div>
+            </div>
+            <div class="col-md-6">
                 <label class="form-label" for="titulo">Titulo</label>
                 <input id="titulo" type="text" th:field="*{titulo}" class="form-control">
                 <div class="text-danger small" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></div>
