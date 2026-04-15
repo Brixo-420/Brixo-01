@@ -140,7 +140,7 @@
     <div th:if="${bloqueado}" class="alert alert-warn">
         <span th:text="${mensajeBloqueo}">Cuenta bloqueada temporalmente.</span>
     </div>
-    <div th:if="${param.error and !bloqueado}" class="alert alert-error">Credenciales inválidas.</div>
+    <div th:if="${param.error}" th:unless="${bloqueado}" class="alert alert-error">Credenciales inválidas.</div>
     <div th:if="${param.logout}" class="alert alert-ok">Sesión cerrada correctamente.</div>
     <div th:if="${registroExitoso}" class="alert alert-ok" th:text="${registroExitoso}"></div>
 
