@@ -22,14 +22,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .successHandler((request, response, authentication) -> {
-                            boolean isAdmin = authentication.getAuthorities().stream()
-                                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-
-                            if (isAdmin) {
-                                response.sendRedirect(request.getContextPath() + "/admin");
-                            } else {
-                                response.sendRedirect(request.getContextPath() + "/dashboard");
-                            }
+                            response.sendRedirect(request.getContextPath() + "/");
                         })
                         .permitAll()
                 )

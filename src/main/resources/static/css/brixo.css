@@ -331,6 +331,18 @@ body.home-page {
     white-space: nowrap;
 }
 
+.bn__user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bn__user-role {
+    font-size: 0.7rem;
+    opacity: 0.65;
+    font-weight: 500;
+}
+
 /* ── Dropdown panel ── */
 .bn__dropdown {
     position: absolute;

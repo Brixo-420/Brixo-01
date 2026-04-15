@@ -32,7 +32,11 @@
                     <span class="bn__avatar bn__avatar--placeholder">
                         <i class="fas fa-user"></i>
                     </span>
-                    <span class="bn__user-name" sec:authentication="name">Mi Cuenta</span>
+                    <div class="bn__user-info">
+                        <span class="bn__user-name" sec:authentication="name">Mi Cuenta</span>
+                        <span class="bn__user-role" th:if="${#authentication.principal.authorities?.size() > 0}"
+                              th:text="'Como ' + ${#authentication.principal.authorities[0].authority.replaceAll('ROLE_', '')}">Como CLIENTE</span>
+                    </div>
                     <i class="fas fa-chevron-down bn__chevron"></i>
                 </button>
                 <div class="bn__dropdown" id="bnDropdown" role="menu">
@@ -73,6 +77,11 @@
         </ul>
         <div class="bn__mobile-divider"></div>
         <div sec:authorize="isAuthenticated()">
+            <div class="bn__mobile-header" style="padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.1);">
+                <div style="font-weight: 600;" sec:authentication="name">Usuario</div>
+                <div style="font-size: 0.75rem; opacity: 0.65;" th:if="${#authentication.principal.authorities?.size() > 0}"
+                     th:text="'Como ' + ${#authentication.principal.authorities[0].authority.replaceAll('ROLE_', '')}">Como CLIENTE</div>
+            </div>
             <div class="bn__mobile-actions">
                 <a th:href="@{/dashboard}" class="bn__dropdown-item"><i class="fas fa-th-large"></i> Mi Panel</a>
             </div>
