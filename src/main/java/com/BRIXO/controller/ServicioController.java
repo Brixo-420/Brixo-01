@@ -225,6 +225,38 @@ public class ServicioController {
         return "redirect:/servicios";
     }
 
+    @GetMapping("/{id}/detalle")
+    public String verDetalle(@PathVariable Long id, Authentication authentication, RedirectAttributes redirectAttributes, Model model) {
+        try {
+            Servicio servicio = servicioService.buscarPorId(id);
+            
+            // Permitir ver detalles a: cliente (propietario), contratista (asignado o no), admin
+            boolean esAdmin = tieneRol(authentication, "ROLE_ADMIN");
+            boolean esCliente = tieneRol(authentication, "ROLE_CLIENTE");
+            boolean esContratista = tieneRol(authentication, "ROLE_CONTRATISTA");
+            
+            String emailActual = authentication.getName();
+            boolean esClientePropietario = esCliente && servicio.getCliente() != null && servicio.getCliente().getEmail().equals(emailActual);
+            boolean esContratistaAsignado = esContratista && servicio.getContratistaAsignado() != null && servicio.getContratistaAsignado().getEmail().equals(emailActual);
+            
+            if (!esAdmin && !esClientePropietario && !esContratista) {
+                redirectAttributes.addFlashAttribute("error", "No tienes permiso para ver este servicio");
+                return "redirect:/servicios";
+            }
+            
+            model.addAttribute("servicio", servicio);
+            model.addAttribute("esAdmin", esAdmin);
+            model.addAttribute("esCliente", esCliente);
+            model.addAttribute("esContratista", esContratista);
+            model.addAttribute("esClientePropietario", esClientePropietario);
+            model.addAttribute("esContratistaAsignado", esContratistaAsignado);
+            return "servicios/detalle";
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/servicios";
+        }
+    }
+
     @GetMapping("/{id}/editar")
     public String editar(@PathVariable Long id, Authentication authentication, RedirectAttributes redirectAttributes, Model model) {
         if (!puedeEditar(authentication)) {

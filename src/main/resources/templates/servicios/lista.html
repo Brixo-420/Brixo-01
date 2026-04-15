@@ -100,16 +100,26 @@
                 <td th:text="${s.contratistaAsignado != null ? s.contratistaAsignado.email : 'Sin asignar'}"></td>
                 <td th:text="${#temporals.format(s.fechaCreacion, 'yyyy-MM-dd HH:mm')}"></td>
                 <td class="text-end">
+                                        <!-- Botón Ver Detalles - Para todos -->
+                                        <a class="btn btn-sm btn-outline-info" th:href="@{/servicios/{id}/detalle(id=${s.id})}">
+                                            <i class="fas fa-eye"></i> Ver
+                                        </a>
+                                        
+                                        <!-- Botón Asignarme - Para contratista en ABIERTO -->
                                         <form th:if="${esContratista and s.estado.name() == 'ABIERTO' and (s.contratistaAsignado == null or s.contratistaAsignado.email == #authentication.name)}"
                                                     th:action="@{/servicios/{id}/asignarme(id=${s.id})}"
                                                     method="post" class="d-inline">
                                                 <button type="submit" class="btn btn-sm btn-outline-secondary">Asignarme</button>
                                         </form>
+                                        
+                                        <!-- Botón Iniciar - Para contratista asignado en ABIERTO -->
                                         <form th:if="${(esContratista or esAdmin) and s.estado.name() == 'ABIERTO' and s.contratistaAsignado != null and (esAdmin or s.contratistaAsignado.email == #authentication.name)}"
                                                     th:action="@{/servicios/{id}/iniciar(id=${s.id})}"
                                                     method="post" class="d-inline">
                                                 <button type="submit" class="btn btn-sm btn-outline-success">Iniciar</button>
                                         </form>
+                                        
+                                        <!-- Botón Finalizar - Para contratista asignado en EN_PROCESO -->
                                         <form th:if="${(esContratista or esAdmin) and s.estado.name() == 'EN_PROCESO' and s.contratistaAsignado != null and (esAdmin or s.contratistaAsignado.email == #authentication.name)}"
                                                     th:action="@{/servicios/{id}/finalizar(id=${s.id})}"
                                                     method="post" class="d-inline">
