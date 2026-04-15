@@ -5,6 +5,8 @@ import com.BRIXO.model.Servicio;
 import com.BRIXO.model.Usuario;
 import com.BRIXO.repository.ServicioRepository;
 import com.BRIXO.repository.UsuarioRepository;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,8 +33,18 @@ public class ServicioService {
         Specification<Servicio> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            // LEFT JOINs para evitar excluir servicios con cliente/contratista null
+            Join<Object, Object> clienteJoin = root.join("cliente", JoinType.LEFT);
+            Join<Object, Object> contratistaJoin = root.join("contratistaAsignado", JoinType.LEFT);
+
+            // Búsqueda por título, nombre de cliente o nombre de contratista
             if (titulo != null && !titulo.isBlank()) {
-                predicates.add(cb.like(cb.lower(root.get("titulo")), "%" + titulo.toLowerCase() + "%"));
+                String pattern = "%" + titulo.toLowerCase() + "%";
+                predicates.add(cb.or(
+                    cb.like(cb.lower(root.get("titulo")), pattern),
+                    cb.like(cb.lower(clienteJoin.get("nombre")), pattern),
+                    cb.like(cb.lower(contratistaJoin.get("nombre")), pattern)
+                ));
             }
 
             if (estado != null && !estado.isBlank()) {
@@ -40,18 +52,18 @@ public class ServicioService {
             }
 
             if (emailCliente != null && !emailCliente.isBlank() && esAdmin) {
-                predicates.add(cb.like(cb.lower(root.get("cliente").get("email")), "%" + emailCliente.toLowerCase() + "%"));
+                predicates.add(cb.like(cb.lower(clienteJoin.get("email")), "%" + emailCliente.toLowerCase() + "%"));
             }
 
             // CLIENTE: solo sus propios servicios
             if (esCliente && !esAdmin) {
-                predicates.add(cb.equal(root.get("cliente").get("email"), usuarioActualEmail));
+                predicates.add(cb.equal(clienteJoin.get("email"), usuarioActualEmail));
             }
 
             // CONTRATISTA: servicios abiertos/en_cotizacion + asignados a él (cualquier estado)
             if (esContratista && !esAdmin) {
                 Predicate abiertos = root.get("estado").in(EstadoServicio.ABIERTO, EstadoServicio.EN_COTIZACION);
-                Predicate asignados = cb.equal(root.get("contratistaAsignado").get("email"), usuarioActualEmail);
+                Predicate asignados = cb.equal(contratistaJoin.get("email"), usuarioActualEmail);
                 predicates.add(cb.or(abiertos, asignados));
             }
 

@@ -144,8 +144,8 @@
         <form method="get" th:action="@{/servicios}">
             <div class="filter-bar" th:classappend="${esAdmin} ? 'has-email' : ''">
                 <div>
-                    <label for="titulo">Título</label>
-                    <input id="titulo" name="titulo" type="text" th:value="${titulo}" placeholder="Buscar por título...">
+                    <label for="titulo">Buscar</label>
+                    <input id="titulo" name="titulo" type="text" th:value="${titulo}" placeholder="Título, cliente o contratista...">
                 </div>
                 <div>
                     <label for="estado">Estado</label>
