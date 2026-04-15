@@ -1,29 +1,174 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <title>Navbar</title>
-</head>
-<body>
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" th:href="@{/}">Brixo</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
-            <span class="navbar-toggler-icon"></span>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- ═══════════ NAVBAR ═══════════
+     overlay=true  → transparente sobre hero (home)
+     overlay=false → glass sólido (otras páginas)
+-->
+<nav th:fragment="navbar(overlay)"
+     th:classappend="${overlay} ? 'bn--overlay' : 'bn--solid'"
+     class="bn" id="brixoNav" role="navigation" aria-label="Navegación principal">
+
+    <div class="bn__inner">
+
+        <!-- Brand -->
+        <a class="bn__brand" th:href="@{/}" aria-label="Brixo inicio">
+            <span class="bn__brand-text">Brixo</span>
+        </a>
+
+        <!-- Links centro -->
+        <ul class="bn__menu" id="bnMenu">
+            <li><a th:href="@{/servicios}"       class="bn__link">Explorar</a></li>
+            <li><a th:href="@{/servicios}"        class="bn__link">Explorar mapa</a></li>
+            <li><a th:href="@{/servicios}"        class="bn__link">Ser Tasker</a></li>
+        </ul>
+
+        <!-- Acciones derecha -->
+        <div class="bn__actions">
+
+            <!-- Usuario autenticado -->
+            <div class="bn__user" id="bnUser" sec:authorize="isAuthenticated()">
+                <button class="bn__user-toggle" id="bnUserToggle"
+                        aria-expanded="false" aria-haspopup="true">
+                    <span class="bn__avatar bn__avatar--placeholder">
+                        <i class="fas fa-user"></i>
+                    </span>
+                    <span class="bn__user-name" sec:authentication="name">Mi Cuenta</span>
+                    <i class="fas fa-chevron-down bn__chevron"></i>
+                </button>
+                <div class="bn__dropdown" id="bnDropdown" role="menu">
+                    <a th:href="@{/dashboard}" class="bn__dropdown-item" role="menuitem"><i class="fas fa-th-large"></i> Mi Panel</a>
+                    <div class="bn__dropdown-divider" sec:authorize="hasRole('ADMIN')"></div>
+                    <a th:href="@{/admin/usuarios}" class="bn__dropdown-item" role="menuitem" sec:authorize="hasRole('ADMIN')"><i class="fas fa-users-cog"></i> Usuarios</a>
+                    <div class="bn__dropdown-divider"></div>
+                    <form th:action="@{/logout}" method="post" class="bn__dropdown-form">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button type="submit" class="bn__dropdown-item bn__dropdown-item--danger" role="menuitem">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Visitante -->
+            <div sec:authorize="!isAuthenticated()">
+                <a th:href="@{/login}" class="bn__link">Iniciar sesión</a>
+                <a th:href="@{/servicios/nuevo}" class="bn__btn">
+                    Publicar tarea
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Hamburger móvil -->
+        <button class="bn__burger" id="bnBurger" aria-label="Menú" aria-expanded="false">
+            <span></span><span></span><span></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarMain">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/servicios}">Servicios</a>
-                </li>
-                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link" th:href="@{/admin/usuarios}">Usuarios</a>
-                </li>
-            </ul>
-            <form th:action="@{/logout}" method="post" class="d-flex">
-                <button class="btn btn-outline-light" type="submit">Salir</button>
+
+    </div>
+
+    <!-- Drawer móvil -->
+    <div class="bn__mobile" id="bnMobile">
+        <ul class="bn__mobile-links">
+            <li><a th:href="@{/servicios}"><i class="fas fa-search"></i> Explorar</a></li>
+            <li><a th:href="@{/servicios}"><i class="fas fa-map-marked-alt"></i> Explorar mapa</a></li>
+            <li><a th:href="@{/servicios}"><i class="fas fa-hard-hat"></i> Ser Tasker</a></li>
+        </ul>
+        <div class="bn__mobile-divider"></div>
+        <div sec:authorize="isAuthenticated()">
+            <div class="bn__mobile-actions">
+                <a th:href="@{/dashboard}" class="bn__dropdown-item"><i class="fas fa-th-large"></i> Mi Panel</a>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="bn__mobile-logout">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
             </form>
         </div>
+        <div sec:authorize="!isAuthenticated()" class="bn__mobile-actions">
+            <a th:href="@{/login}"          class="bn__btn w-100 justify-content-center">Iniciar sesión</a>
+            <a th:href="@{/servicios/nuevo}" class="bn__btn w-100 justify-content-center" style="background:var(--accent-warm);color:#111">Publicar tarea</a>
+        </div>
     </div>
+
 </nav>
-</body>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer th:fragment="footer" class="site-footer">
+    <div class="container" style="max-width:1200px">
+        <div class="row g-5 pb-5">
+            <div class="col-lg-4">
+                <a th:href="@{/}" class="d-inline-block mb-3">
+                    <span class="h4 fw-bold text-white">Brixo</span>
+                </a>
+                <p class="opacity-75 small lh-lg mb-3">
+                    Conectamos hogares con los mejores profesionales.
+                    Plomería, electricidad, carpintería, pintura y mucho más.
+                </p>
+            </div>
+            <div class="col-6 col-lg-2">
+                <h5 class="h6 fw-bold text-white mb-3">Servicios</h5>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a th:href="@{/servicios}" class="text-white-50 text-decoration-none">Plomería</a></li>
+                    <li class="mb-2"><a th:href="@{/servicios}" class="text-white-50 text-decoration-none">Electricidad</a></li>
+                    <li class="mb-2"><a th:href="@{/servicios}" class="text-white-50 text-decoration-none">Carpintería</a></li>
+                    <li class="mb-2"><a th:href="@{/servicios}" class="text-white-50 text-decoration-none">Pintura</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-lg-2">
+                <h5 class="h6 fw-bold text-white mb-3">Empresa</h5>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a th:href="@{/}" class="text-white-50 text-decoration-none">Sobre nosotros</a></li>
+                    <li class="mb-2"><a th:href="@{/}" class="text-white-50 text-decoration-none">Cómo funciona</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.08)">
+        <div class="container py-3 d-flex flex-wrap justify-content-between align-items-center gap-2 small opacity-60"
+             style="max-width:1200px">
+            <span>&copy; 2026 Brixo. Todos los derechos reservados.</span>
+            <span>Hecho con <i class="fas fa-heart text-danger"></i> en Colombia</span>
+        </div>
+    </div>
+</footer>
+
+<!-- ═══════════ NAVBAR JS ═══════════ -->
+<th:block th:fragment="navbarJs">
+<script>
+(function () {
+    const nav    = document.getElementById('brixoNav');
+    const burger = document.getElementById('bnBurger');
+    const mobile = document.getElementById('bnMobile');
+    const userBtn= document.getElementById('bnUserToggle');
+    const userDd = document.getElementById('bnUser');
+
+    if (nav && nav.classList.contains('bn--overlay')) {
+        const onScroll = () => nav.classList.toggle('bn--scrolled', window.scrollY > 40);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+    }
+
+    if (burger && mobile) {
+        burger.addEventListener('click', () => {
+            const open = burger.classList.toggle('open');
+            mobile.classList.toggle('open', open);
+            burger.setAttribute('aria-expanded', open);
+        });
+    }
+
+    if (userBtn && userDd) {
+        userBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDd.classList.toggle('open');
+            userBtn.setAttribute('aria-expanded', userDd.classList.contains('open'));
+        });
+        document.addEventListener('click', () => userDd.classList.remove('open'));
+    }
+})();
+</script>
+</th:block>
+
 </html>

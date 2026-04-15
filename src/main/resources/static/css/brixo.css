@@ -1,0 +1,751 @@
+/* Global Styles */
+/* Fuente principal: Inter (Google Fonts) — tipografía moderna y altamente legible */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* Importar sistema de diseño */
+@import url('/css/design-system.css');
+
+:root {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+    background-color: var(--neutral-50);
+    padding-top: 0;
+    color: var(--text-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Cuando la navbar flotante está presente (se añade la clase `floating-offset` al body) 
+   añadimos espacio superior para separar la navbar fija de botones/elementos de panel. */
+body.floating-offset main,
+body.floating-offset .container,
+body.floating-offset .container-fluid,
+body.floating-offset .main-container {
+    padding-top: calc(var(--navbar-offset) + var(--spacing-lg));
+}
+@media (max-width: 768px) {
+    body.floating-offset main,
+    body.floating-offset .container,
+    body.floating-offset .container-fluid,
+    body.floating-offset .main-container {
+        padding-top: calc(var(--navbar-offset) / 1.8);
+    }
+}
+
+/* Altura consistente para el mapa del home, independiente de la cantidad de puntos */
+#leaflet-map {
+    width: 100%;
+    height: 420px;
+}
+
+@media (min-width: 992px) {
+    #leaflet-map {
+        height: 480px;
+    }
+}
+
+/* En la home no aplicamos padding-top global, el hero ya ocupa todo el alto */
+body.home-page {
+    padding-top: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BRIXO NAVBAR (bn) — Glassmorphism · Hybrid
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Base ── */
+.bn {
+    --bn-h: 72px;
+    --bn-blur: 18px;
+    --bn-glass-bg: rgba(255, 255, 255, 0.72);
+    --bn-glass-border: rgba(255, 255, 255, 0.35);
+    --bn-glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.06);
+    --bn-text: #1a1a1a;
+    --bn-text-muted: #6b6b63;
+    --bn-accent: var(--primary-color, #009fd9);
+    --bn-radius: 20px;
+    --bn-transition: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    width: 100%;
+    height: var(--bn-h);
+    z-index: 1060;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background var(--bn-transition),
+                box-shadow var(--bn-transition),
+                border-color var(--bn-transition);
+}
+
+/* ── Solid mode (default — position relative, pushes content) ── */
+.bn--solid {
+    position: relative;
+    background: var(--bn-glass-bg);
+    backdrop-filter: blur(var(--bn-blur)) saturate(1.6);
+    -webkit-backdrop-filter: blur(var(--bn-blur)) saturate(1.6);
+    border-bottom: 1px solid var(--bn-glass-border);
+    box-shadow: var(--bn-glass-shadow);
+}
+
+/* ── Overlay mode (home & map — position fixed, transparent) ── */
+.bn--overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: 1px solid transparent;
+    box-shadow: none;
+}
+/* Map mode: permanent glass (no scroll on map page) */
+.bn--overlay.bn--map {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(var(--bn-blur)) saturate(1.6);
+    -webkit-backdrop-filter: blur(var(--bn-blur)) saturate(1.6);
+    border-bottom-color: var(--bn-glass-border);
+    box-shadow: var(--bn-glass-shadow);
+}
+.bn--overlay.bn--map .bn__link       { color: var(--bn-text); }
+.bn--overlay.bn--map .bn__link:hover  { color: var(--bn-accent); background: rgba(0,0,0,0.05); }
+.bn--overlay.bn--map .bn__link--active { color: var(--bn-accent); background: transparent; }
+.bn--overlay.bn--map .bn__brand-text  { color: var(--bn-text); }
+.bn--overlay.bn--map .bn__btn         { background: var(--bn-accent); border: none; backdrop-filter: none; }
+.bn--overlay.bn--map .bn__btn:hover   { background: var(--primary-hover, #0077B6); }
+.bn--overlay.bn--map .bn__user-toggle { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.06); color: var(--bn-text); }
+.bn--overlay.bn--map .bn__burger      { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.06); }
+.bn--overlay.bn--map .bn__burger span { background: var(--bn-text); }
+
+/* Overlay scrolled: glass kicks in */
+.bn--overlay.bn--scrolled {
+    background: var(--bn-glass-bg);
+    backdrop-filter: blur(var(--bn-blur)) saturate(1.6);
+    -webkit-backdrop-filter: blur(var(--bn-blur)) saturate(1.6);
+    border-bottom-color: var(--bn-glass-border);
+    box-shadow: var(--bn-glass-shadow);
+}
+
+/* ── Inner container ── */
+.bn__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    gap: 32px;
+}
+
+/* ── Brand ── */
+.bn__brand {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+.bn__brand img {
+    height: 30px;
+    width: auto;
+    display: block;
+    transition: transform var(--bn-transition);
+}
+.bn__brand:hover img {
+    transform: scale(1.05);
+}
+.bn__brand-text {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--bn-text);
+}
+.bn--overlay:not(.bn--scrolled):not(.bn--map) .bn__brand-text {
+    color: #fff;
+}
+
+/* ── Menu (centro) ── */
+.bn__menu {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Links ── */
+.bn__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bn-text);
+    text-decoration: none;
+    border-radius: var(--bn-radius);
+    transition: background var(--bn-transition),
+                color var(--bn-transition),
+                transform var(--bn-transition);
+    white-space: nowrap;
+}
+.bn__link:hover,
+.bn__link:focus-visible {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--bn-accent);
+    transform: translateY(-1px);
+}
+.bn__link--active {
+    color: var(--bn-accent);
+    font-weight: 600;
+}
+
+/* Overlay text colors (white over hero) */
+.bn--overlay:not(.bn--scrolled):not(.bn--map) .bn__link {
+    color: rgba(255, 255, 255, 0.85);
+}
+.bn--overlay:not(.bn--scrolled):not(.bn--map) .bn__link:hover,
+.bn--overlay:not(.bn--scrolled):not(.bn--map) .bn__link:focus-visible {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+}
+.bn--overlay:not(.bn--scrolled):not(.bn--map) .bn__link--active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── CTA button (Ingresar) ── */
+.bn__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 22px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--bn-accent);
+    border: none;
+    border-radius: var(--bn-radius);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--bn-transition),
+                transform var(--bn-transition),
+                box-shadow var(--bn-transition);
+    white-space: nowrap;
+}
+.bn__btn:hover,
+.bn__btn:focus-visible {
+    background: var(--primary-hover, #0077B6);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 159, 217, 0.3);
+}
+.bn__btn--block { width: 100%; }
+
+/* Overlay button */
+.bn--overlay:not(.bn--scrolled):not(.bn--map) .bn__btn {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.bn--overlay:not(.bn--scrolled):not(.bn--map) .bn__btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Actions (right group) ── */
+.bn__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── User dropdown ── */
+.bn__user {
+    position: relative;
+}
+.bn__user-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 12px 5px 5px;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: var(--bn-radius);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bn-text);
+    transition: background var(--bn-transition),
+                border-color var(--bn-transition);
+}
+.bn__user-toggle:hover {
+    background: rgba(0, 0, 0, 0.07);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Overlay user toggle */
+.bn--overlay:not(.bn--scrolled):not(.bn--map) .bn__user-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+.bn--overlay:not(.bn--scrolled):not(.bn--map) .bn__user-toggle:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+/* ── Avatar ── */
+.bn__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.bn__avatar--placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bn-accent) 0%, var(--primary-hover, #0077B6) 100%);
+    color: #fff;
+    font-size: 0.8rem;
+}
+
+/* ── Chevron ── */
+.bn__chevron {
+    font-size: 0.6rem;
+    opacity: 0.5;
+    transition: transform var(--bn-transition);
+}
+.bn__user.open .bn__chevron {
+    transform: rotate(180deg);
+}
+.bn__user-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Dropdown panel ── */
+.bn__dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 240px;
+    padding: 8px;
+    list-style: none;
+    /* Glassmorphism */
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12),
+                0 2px 8px rgba(0, 0, 0, 0.04);
+    /* Hidden state */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.97);
+    transform-origin: top right;
+    transition: opacity var(--bn-transition),
+                visibility var(--bn-transition),
+                transform var(--bn-transition);
+    z-index: 1100;
+}
+.bn__user.open .bn__dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+.bn__dropdown-header {
+    padding: 8px 12px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--bn-text-muted);
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    margin-bottom: 4px;
+}
+.bn__dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bn-text);
+    text-decoration: none;
+    background: none;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background var(--bn-transition),
+                color var(--bn-transition);
+}
+.bn__dropdown-item i {
+    width: 18px;
+    text-align: center;
+    font-size: 0.85rem;
+    opacity: 0.55;
+    transition: opacity var(--bn-transition);
+}
+.bn__dropdown-item:hover {
+    background: rgba(0, 159, 217, 0.08);
+    color: var(--bn-accent);
+}
+.bn__dropdown-item:hover i {
+    opacity: 1;
+}
+.bn__dropdown-item--danger {
+    color: #dc3545;
+}
+.bn__dropdown-item--danger:hover {
+    background: rgba(220, 53, 69, 0.08);
+    color: #dc3545;
+}
+.bn__dropdown-divider {
+    height: 1px;
+    margin: 4px 8px;
+    background: rgba(0, 0, 0, 0.06);
+}
+.bn__dropdown-form {
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Hamburger ── */
+.bn__burger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background var(--bn-transition);
+}
+.bn__burger:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+.bn__burger span {
+    display: block;
+    height: 2px;
+    background: var(--bn-text);
+    border-radius: 2px;
+    transition: transform var(--bn-transition),
+                opacity var(--bn-transition);
+}
+/* Overlay burger */
+.bn--overlay:not(.bn--scrolled):not(.bn--map) .bn__burger {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+.bn--overlay:not(.bn--scrolled):not(.bn--map) .bn__burger span {
+    background: #fff;
+}
+/* Open state */
+.bn__burger.open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+.bn__burger.open span:nth-child(2) {
+    opacity: 0;
+}
+.bn__burger.open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── Mobile drawer ── */
+.bn__mobile {
+    display: none;
+    position: absolute;
+    top: var(--bn-h);
+    left: 12px;
+    right: 12px;
+    padding: 16px;
+    /* Glassmorphism */
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.14);
+    /* Animation */
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity var(--bn-transition),
+                transform var(--bn-transition);
+    z-index: 1059;
+}
+.bn__mobile.open {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+.bn__mobile-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.bn__mobile-links li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--bn-text);
+    text-decoration: none;
+    border-radius: 12px;
+    transition: background var(--bn-transition);
+}
+.bn__mobile-links li a:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+.bn__mobile-links li a i {
+    width: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.5;
+}
+.bn__mobile-divider {
+    height: 1px;
+    margin: 8px 0;
+    background: rgba(0, 0, 0, 0.06);
+}
+.bn__mobile-user {
+    padding: 8px 14px;
+}
+.bn__mobile-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--bn-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.bn__mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px 0;
+    text-align: center;
+}
+.bn__mobile-logout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #dc3545;
+    background: none;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background var(--bn-transition);
+}
+.bn__mobile-logout:hover {
+    background: rgba(220, 53, 69, 0.06);
+}
+
+/* ── Responsive ── */
+@media (max-width: 767.98px) {
+    .bn__menu,
+    .bn__actions {
+        display: none;
+    }
+    .bn__burger {
+        display: flex;
+    }
+    .bn__inner {
+        padding: 0 16px;
+    }
+}
+
+.hover-underline:hover {
+    text-decoration: underline !important;
+}
+
+/* Service Nav Scrollbar Hiding */
+.service-nav::-webkit-scrollbar { 
+    display: none;  /* Chrome/Safari */
+}
+.service-nav {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE 10+ */
+}
+
+
+
+/* =========================================
+   MAP PAGE: Navbar overlay (no push-down)
+   ========================================= */
+body.map-page {
+    padding-top: 0 !important;
+    overflow: hidden;
+}
+
+body.map-page #mapApp {
+    height: 100vh;
+}
+
+body.map-page main.content {
+    height: 100vh;
+}
+
+/* Glassmorphism / Backdrop Blur */
+.backdrop-blur {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Hero specific adjustments */
+.hero h1 {
+    text-shadow: var(--text-shadow-strong);
+}
+
+.hero .btn-outline-light:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: #fff;
+    border-color: #fff;
+}
+
+/* Hero base padding (non-home pages only) */
+.hero:not(.brixo-hero) {
+    padding-top: 50px;
+}
+
+/* Info pages: keep hero background aligned with navbar and add breathing room before title */
+body:not(.home-page) main > section:first-of-type.bg-light {
+    background-color: inherit !important;
+}
+
+body:not(.home-page) main > section:first-of-type .container {
+    padding-top: calc(var(--navbar-offset) / 2);
+}
+
+/* Hero Text Shadow */
+.text-shadow {
+    text-shadow: var(--text-shadow-strong);
+}
+
+/* Image Card Overlay Gradient */
+.bg-gradient-overlay {
+    background: linear-gradient(to top, var(--overlay-strong) 0%, rgba(0,0,0,0) 100%);
+}
+
+.card-img-overlay-container {
+    height: 280px; /* Fixed height for consistency */
+    transition: transform 0.2s ease;
+    cursor: pointer;
+}
+
+.card-img-overlay-container:hover {
+    transform: scale(1.02);
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}
+
+/* Map section layout */
+.map-layout { display: flex; }
+.map-canvas { height: 520px; border-radius: 16px; overflow: hidden; background: #eee; }
+.map-sidebar { width: 360px; min-width: 300px; max-width: 380px; border: 1px solid var(--border-color); border-radius: 16px; background: #fff; padding: 16px; }
+@media (max-width: 992px){
+    .map-layout { flex-direction: column; }
+    .map-sidebar { width: 100%; }
+    .map-canvas { height: 420px; }
+}
+/* Fondo diferenciado sección mapa */
+.map-section { background-color: #f5f1e9; }
+
+/* Brixo Navbar (legacy styles removed; see top of file for current light style) */
+
+/* ---------------------------------------------------------
+   Leaflet compatibility fix against Bootstrap img rules
+   --------------------------------------------------------- */
+.leaflet-container img {
+    max-width: none !important;
+}
+
+.leaflet-container .leaflet-tile {
+    max-width: none !important;
+    max-height: none !important;
+    height: inherit !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+/* -------- Footer -------- */
+.site-footer {
+    background-color: var(--neutral-900);
+    color: rgba(255,255,255,0.7);
+    padding-top: 3.5rem;
+}
+.site-footer h4, .site-footer .h5 {
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+.site-footer a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+.site-footer a:hover {
+    color: #fff;
+}
+.site-footer .hover-text-white:hover {
+    color: #ffffff !important;
+}
+
+/* =========================================
+   PASSWORD TOGGLE (Eye Icon)
+   ========================================= */
+.password-field-wrapper {
+    position: relative;
+    display: block;
+}
+
+.password-field-wrapper input[type="password"],
+.password-field-wrapper input[type="text"] {
+    padding-right: 3rem !important;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #6c757d;
+    font-size: 1.1rem;
+    padding: 0.5rem 0.85rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    z-index: 5;
+}
+
+.password-toggle-btn:hover {
+    color: var(--primary-color, #009fd9);
+}
+
+.password-toggle-btn:focus {
+    outline: none;
+    color: var(--primary-color, #009fd9);
+}

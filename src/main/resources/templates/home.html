@@ -1,87 +1,410 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bienvenido a Brixo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Brixo – Encuentra profesionales locales</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/brixo.css}">
+
     <style>
-        body {
-            background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
-            color: #1f2937;
-        }
+        body.home-page { background: var(--neutral-50); }
 
-        .hero {
-            min-height: calc(100vh - 76px);
-            display: flex;
-            align-items: center;
+        .brixo-hero {
+            position: relative; min-height: 85vh;
+            display: flex; align-items: flex-end;
+            overflow: hidden; background: #111;
         }
-
-        .hero-card {
-            border: 0;
-            border-radius: 20px;
-            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.10);
+        .brixo-hero__bg {
+            position: absolute; inset: 0;
+            background-size: cover; background-position: center 40%;
+            transform: scale(1.02);
+            transition: transform 8s ease-out;
         }
+        .brixo-hero.loaded .brixo-hero__bg { transform: scale(1); }
+        .brixo-hero__overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top,
+                rgba(0,0,0,0.75) 0%,
+                rgba(0,0,0,0.25) 45%,
+                rgba(0,0,0,0.10) 100%);
+        }
+        .brixo-hero__content { position: relative; z-index: 2; padding: 0 0 clamp(48px,8vh,96px); width: 100%; }
+        .brixo-hero__title {
+            font-size: clamp(2.4rem,5.5vw,4.5rem); font-weight: 800;
+            line-height: 1.05; letter-spacing: -0.03em;
+            color: #fff; margin-bottom: 20px;
+        }
+        .brixo-hero__subtitle {
+            font-size: clamp(1rem,1.8vw,1.25rem); font-weight: 400;
+            color: rgba(255,255,255,0.85); max-width: 520px;
+            line-height: 1.6; margin-bottom: 32px;
+        }
+        .brixo-hero__actions { display: flex; flex-wrap: wrap; gap: 12px; }
 
-        .badge-soft {
-            background: #e0f2fe;
-            color: #0369a1;
+        .btn-brixo {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 28px; font-weight: 700; font-size: 0.95rem;
+            border-radius: var(--radius-full); border: none; cursor: pointer;
+            transition: all var(--transition-base); text-decoration: none;
+        }
+        .btn-brixo--primary { background: var(--primary-color); color: #fff; }
+        .btn-brixo--primary:hover { background: var(--primary-hover); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,159,217,0.3); }
+        .btn-brixo--warm { background: var(--accent-warm); color: #111; }
+        .btn-brixo--warm:hover { background: var(--accent-warm-hover); color: #111; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,199,44,0.35); }
+        .btn-brixo--outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+        .btn-brixo--outline:hover { background: rgba(255,255,255,0.12); color: #fff; border-color: #fff; }
+        .btn-brixo--dark { background: var(--neutral-900); color: #fff; }
+        .btn-brixo--dark:hover { background: #333; color: #fff; transform: translateY(-2px); }
+
+        .quick-cats {
+            background: rgba(255,255,255,0.10);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: var(--radius-xl); padding: 28px; color: #fff;
+        }
+        .quick-cats__title { font-weight: 700; font-size: 1rem; margin-bottom: 16px; }
+        .quick-cats__link {
+            display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+            border-radius: var(--radius-md); color: #fff; text-decoration: none;
+            font-weight: 500; font-size: 0.9rem; transition: all var(--transition-fast);
+        }
+        .quick-cats__link:hover { background: rgba(255,255,255,0.15); color: #fff; transform: translateX(4px); }
+        .quick-cats__link i {
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.15); border-radius: var(--radius-md); font-size: 0.95rem;
+        }
+        .quick-cats__all {
+            display: block; text-align: center; margin-top: 16px; padding: 12px;
+            background: #fff; color: var(--neutral-900);
+            border-radius: var(--radius-md); font-weight: 700; font-size: 0.9rem;
+            text-decoration: none; transition: all var(--transition-fast);
+        }
+        .quick-cats__all:hover { background: var(--accent-warm); color: #111; transform: translateY(-2px); }
+
+        .section-heading { font-size: clamp(1.6rem,3vw,2.25rem); font-weight: 800; letter-spacing: -0.03em; color: var(--neutral-900); margin-bottom: 12px; }
+        .section-subheading { font-size: 1.05rem; color: var(--text-secondary); max-width: 560px; margin-bottom: 32px; }
+
+        .editorial-block { border-radius: var(--radius-xl); overflow: hidden; display: grid; min-height: 420px; }
+        .editorial-block--map { grid-template-columns: 1fr 1fr; }
+        .editorial-block__text { padding: clamp(32px,5vw,64px); display: flex; flex-direction: column; justify-content: center; }
+        .editorial-block__text h2 { font-size: clamp(1.5rem,2.8vw,2.2rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 16px; }
+        .editorial-block__text p  { font-size: 1.05rem; line-height: 1.6; margin-bottom: 28px; opacity: 0.85; }
+        .editorial-block__image   { position: relative; overflow: hidden; background: var(--neutral-100); display:flex; align-items:center; justify-content:center; }
+        .editorial-block__image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+        .editorial-block:hover .editorial-block__image img { transform: scale(1.04); }
+
+        .cat-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 16px; }
+        .cat-pill {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 12px; padding: 24px 12px;
+            background: #fff; border: 2px solid transparent;
+            border-radius: var(--radius-lg); text-decoration: none; color: var(--neutral-900);
+            transition: all var(--transition-base);
+        }
+        .cat-pill:hover { border-color: var(--primary-color); transform: translateY(-4px); box-shadow: var(--shadow-lg); color: var(--neutral-900); }
+        .cat-pill__icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; transition: all var(--transition-base); }
+        .cat-pill:hover .cat-pill__icon { transform: scale(1.12); }
+        .cat-pill__label { font-weight: 600; font-size: 0.85rem; }
+        .cat-pill--obra        .cat-pill__icon { background: #FFF3E0; color: #E65100; }
+        .cat-pill--carpinteria .cat-pill__icon { background: #FBE9E7; color: #BF360C; }
+        .cat-pill--plomeria    .cat-pill__icon { background: #E3F2FD; color: #1565C0; }
+        .cat-pill--electricidad .cat-pill__icon { background: #FFFDE7; color: #F57F17; }
+        .cat-pill--pintura     .cat-pill__icon { background: #F3E5F5; color: #7B1FA2; }
+        .cat-pill--otros       .cat-pill__icon { background: #E8F5E9; color: #2E7D32; }
+
+        .showcase-grid { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 280px 280px; gap: 16px; }
+        .showcase-card { position: relative; overflow: hidden; border-radius: var(--radius-xl); cursor: pointer; text-decoration: none; }
+        .showcase-card:first-child { grid-row: 1 / 3; }
+        .showcase-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+        .showcase-card:hover img { transform: scale(1.06); }
+        .showcase-card__label { position: absolute; bottom: 0; left: 0; right: 0; padding: 24px; background: linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 100%); color: #fff; }
+        .showcase-card__label h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+        .showcase-card__label span { font-size: 0.85rem; opacity: 0.85; }
+
+        .tools-banner { position: relative; overflow: hidden; border-radius: var(--radius-xl); min-height: 340px; display: flex; align-items: center; background: #1a1a1a; }
+        .tools-banner__bg { position: absolute; inset: 0; }
+        .tools-banner__bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+        .tools-banner__overlay { position: absolute; inset: 0; background: linear-gradient(105deg,rgba(0,0,0,0.72) 0%,rgba(0,0,0,0.20) 70%); }
+        .tools-banner__content { position: relative; z-index: 2; padding: clamp(32px,5vw,56px); max-width: 560px; color: #fff; }
+        .tools-banner__content h3 { font-size: clamp(1.5rem,3vw,2.2rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
+        .tools-banner__content p { font-size: 1.05rem; line-height: 1.6; opacity: 0.9; margin-bottom: 24px; }
+
+        .trust-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 0; background: #fff; border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-md); }
+        .trust-item { padding: 32px 24px; text-align: center; border-right: 1px solid var(--neutral-200); transition: background var(--transition-base); }
+        .trust-item:last-child { border-right: none; }
+        .trust-item:hover { background: var(--neutral-100); }
+        .trust-item__icon { width: 52px; height: 52px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 12px; }
+        .trust-item__number { font-size: 1.8rem; font-weight: 800; color: var(--neutral-900); letter-spacing: -0.02em; }
+        .trust-item__label { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); margin-top: 4px; }
+
+        .cta-block { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .cta-card { border-radius: var(--radius-xl); padding: clamp(32px,5vw,56px); display: flex; flex-direction: column; justify-content: center; }
+        .cta-card h2 { font-size: clamp(1.5rem,2.5vw,2rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
+        .cta-card p { font-size: 1rem; line-height: 1.6; margin-bottom: 24px; opacity: 0.85; }
+
+        @media (max-width: 991.98px) {
+            .editorial-block--map { grid-template-columns: 1fr; }
+            .editorial-block__image { min-height: 260px; }
+            .cat-grid { grid-template-columns: repeat(3,1fr); }
+            .showcase-grid { grid-template-columns: 1fr; grid-template-rows: 300px 240px 240px; }
+            .showcase-card:first-child { grid-row: auto; }
+            .cta-block { grid-template-columns: 1fr; }
+            .trust-strip { grid-template-columns: repeat(2,1fr); }
+            .trust-item:nth-child(2) { border-right: none; }
+        }
+        @media (max-width: 575.98px) {
+            .cat-grid { grid-template-columns: repeat(2,1fr); }
+            .trust-strip { grid-template-columns: 1fr; }
+            .trust-item { border-right: none; border-bottom: 1px solid var(--neutral-200); }
+            .trust-item:last-child { border-bottom: none; }
         }
     </style>
 </head>
-<body>
-<nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm">
-    <div class="container">
-        <a class="navbar-brand fw-bold text-primary" th:href="@{/}">Brixo</a>
-        <div class="ms-auto">
-            <a class="btn btn-primary" th:href="@{/login}">Iniciar sesión</a>
+
+<body class="home-page">
+
+    <div th:replace="~{fragments/navbar :: navbar(overlay=true)}"></div>
+
+    <!-- HERO -->
+    <section class="brixo-hero" id="hero">
+        <div class="brixo-hero__bg"
+             style="background-image: url('https://brixo-services.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fhero2.457d5ba2.jpg&w=1920&q=75');">
         </div>
-    </div>
-</nav>
+        <div class="brixo-hero__overlay"></div>
 
-<main class="hero">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="card hero-card p-4 p-md-5">
-                    <span class="badge badge-soft rounded-pill mb-3 px-3 py-2 w-auto">Plataforma Brixo</span>
-                    <h1 class="display-5 fw-bold mb-3">Bienvenido a Brixo</h1>
-                    <p class="lead mb-4">
-                        Brixo es una plataforma para gestionar servicios, usuarios y procesos de trabajo de forma segura,
-                        organizada y accesible. Desde aquí puedes conocer la solución e iniciar sesión para entrar al panel.
-                    </p>
+        <div class="brixo-hero__content">
+            <div class="container" style="max-width:1200px">
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
 
-                    <div class="d-flex flex-wrap gap-2">
-                        <a class="btn btn-primary btn-lg" th:href="@{/login}">Iniciar sesión</a>
-                        <a class="btn btn-outline-secondary btn-lg" th:href="@{/home}">Ver inicio</a>
+                <div class="row align-items-end g-4">
+                    <div class="col-lg-7">
+                        <h1 class="brixo-hero__title">Profesionales<br>confiables, cuando<br>los necesitas</h1>
+                        <p class="brixo-hero__subtitle">Reserva por horas a expertos en obra, carpintería, plomería y más. Publica tu necesidad o reserva de inmediato.</p>
+                        <div class="brixo-hero__actions">
+                            <a th:href="@{/servicios}" class="btn-brixo btn-brixo--warm">
+                                <i class="fas fa-map-marked-alt"></i> Explorar Taskers
+                            </a>
+                            <a th:href="@{/servicios/nuevo}" class="btn-brixo btn-brixo--outline">
+                                <i class="fas fa-plus-circle"></i> Publicar tarea
+                            </a>
+                            <a th:href="@{/servicios}" class="btn-brixo btn-brixo--outline">
+                                Ser Tasker
+                            </a>
+                        </div>
                     </div>
-
-                    <hr class="my-4">
-
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="border rounded-3 p-3 h-100">
-                                <h2 class="h5">Gestión centralizada</h2>
-                                <p class="mb-0">Administra usuarios, servicios y operaciones desde una sola plataforma.</p>
+                    <div class="col-lg-5">
+                        <div class="quick-cats">
+                            <div class="quick-cats__title">Categorías populares</div>
+                            <div class="row g-2">
+                                <div class="col-6"><a th:href="@{/servicios}" class="quick-cats__link"><i class="fas fa-hard-hat"></i> Obra</a></div>
+                                <div class="col-6"><a th:href="@{/servicios}" class="quick-cats__link"><i class="fas fa-hammer"></i> Carpintería</a></div>
+                                <div class="col-6"><a th:href="@{/servicios}" class="quick-cats__link"><i class="fas fa-wrench"></i> Plomería</a></div>
+                                <div class="col-6"><a th:href="@{/servicios}" class="quick-cats__link"><i class="fas fa-bolt"></i> Electricidad</a></div>
+                                <div class="col-6"><a th:href="@{/servicios}" class="quick-cats__link"><i class="fas fa-paint-roller"></i> Pintura</a></div>
+                                <div class="col-6"><a th:href="@{/servicios}" class="quick-cats__link"><i class="fas fa-ellipsis-h"></i> Otros</a></div>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="border rounded-3 p-3 h-100">
-                                <h2 class="h5">Acceso por roles</h2>
-                                <p class="mb-0">Cada usuario entra según su perfil y permisos dentro del sistema.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="border rounded-3 p-3 h-100">
-                                <h2 class="h5">Interfaz clara</h2>
-                                <p class="mb-0">La aplicación usa Spring Boot y Thymeleaf para una experiencia simple y estable.</p>
-                            </div>
+                            <a th:href="@{/servicios}" class="quick-cats__all">
+                                Ver todos los servicios <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
+    </section>
+
+    <!-- TRUST STRIP -->
+    <section style="padding:48px 0 0">
+        <div class="container" style="max-width:1200px">
+            <div class="trust-strip">
+                <div class="trust-item">
+                    <div class="trust-item__icon" style="background:#E3F2FD;color:#1565C0"><i class="fas fa-user-check"></i></div>
+                    <div class="trust-item__number">500+</div>
+                    <div class="trust-item__label">Profesionales verificados</div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-item__icon" style="background:#E8F5E9;color:#2E7D32"><i class="fas fa-star"></i></div>
+                    <div class="trust-item__number">4.8</div>
+                    <div class="trust-item__label">Calificación promedio</div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-item__icon" style="background:#FFF3E0;color:#E65100"><i class="fas fa-tools"></i></div>
+                    <div class="trust-item__number">100+</div>
+                    <div class="trust-item__label">Tipos de servicio</div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-item__icon" style="background:#F3E5F5;color:#7B1FA2"><i class="fas fa-shield-alt"></i></div>
+                    <div class="trust-item__number">100%</div>
+                    <div class="trust-item__label">Garantía de calidad</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAP EDITORIAL BLOCK -->
+    <section style="padding:64px 0">
+        <div class="container" style="max-width:1200px">
+            <div class="editorial-block editorial-block--map" style="background:var(--accent-sand)">
+                <div class="editorial-block__text">
+                    <h2 style="color:var(--neutral-900)">Encuentra profesionales<br>cerca de ti</h2>
+                    <p style="color:var(--text-secondary)">Explora y encuentra contratistas verificados, sus reseñas y precios estimados — todo para tu proyecto.</p>
+                    <div>
+                        <a th:href="@{/servicios}" class="btn-brixo btn-brixo--dark">
+                            <i class="fas fa-map-marked-alt"></i> Ver profesionales
+                        </a>
+                    </div>
+                </div>
+                <div class="editorial-block__image" style="min-height:260px">
+                    <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png"
+                         alt="Mapa de profesionales"
+                         style="width:320px;height:320px;object-fit:contain;padding:24px">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVICIOS GRID -->
+    <section style="padding:0 0 64px">
+        <div class="container" style="max-width:1200px">
+            <h2 class="section-heading">Servicios populares</h2>
+            <p class="section-subheading">Todo lo que tu hogar o proyecto necesita, resuelto por expertos.</p>
+            <div class="cat-grid">
+                <a th:href="@{/servicios}" class="cat-pill cat-pill--obra">
+                    <div class="cat-pill__icon"><i class="fas fa-hard-hat"></i></div>
+                    <span class="cat-pill__label">Obra</span>
+                </a>
+                <a th:href="@{/servicios}" class="cat-pill cat-pill--carpinteria">
+                    <div class="cat-pill__icon"><i class="fas fa-hammer"></i></div>
+                    <span class="cat-pill__label">Carpintería</span>
+                </a>
+                <a th:href="@{/servicios}" class="cat-pill cat-pill--plomeria">
+                    <div class="cat-pill__icon"><i class="fas fa-wrench"></i></div>
+                    <span class="cat-pill__label">Plomería</span>
+                </a>
+                <a th:href="@{/servicios}" class="cat-pill cat-pill--electricidad">
+                    <div class="cat-pill__icon"><i class="fas fa-bolt"></i></div>
+                    <span class="cat-pill__label">Electricidad</span>
+                </a>
+                <a th:href="@{/servicios}" class="cat-pill cat-pill--pintura">
+                    <div class="cat-pill__icon"><i class="fas fa-paint-roller"></i></div>
+                    <span class="cat-pill__label">Pintura</span>
+                </a>
+                <a th:href="@{/servicios}" class="cat-pill cat-pill--otros">
+                    <div class="cat-pill__icon"><i class="fas fa-ellipsis-h"></i></div>
+                    <span class="cat-pill__label">Otros</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- TOOLS BANNER -->
+    <section style="padding:0 0 64px">
+        <div class="container" style="max-width:1200px">
+            <div class="tools-banner">
+                <div class="tools-banner__bg">
+                    <img src="https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=1400&q=75"
+                         alt="Herramientas de trabajo">
+                </div>
+                <div class="tools-banner__overlay"></div>
+                <div class="tools-banner__content">
+                    <h3>¿Necesitas un profesional?</h3>
+                    <p>Publica tu necesidad y conecta con expertos verificados en minutos. Rápido, seguro y confiable.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a th:href="@{/servicios/nuevo}" class="btn-brixo btn-brixo--warm">
+                            <i class="fas fa-plus-circle"></i> Publicar solicitud
+                        </a>
+                        <a th:href="@{/servicios}" class="btn-brixo btn-brixo--outline">
+                            <i class="fas fa-search"></i> Explorar servicios
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SHOWCASE GRID -->
+    <section style="padding:0 0 64px">
+        <div class="container" style="max-width:1200px">
+            <h2 class="section-heading">Proyectos destacados</h2>
+            <p class="section-subheading">Inspírate con los trabajos que nuestros profesionales realizan cada día.</p>
+            <div class="showcase-grid">
+                <a th:href="@{/servicios}" class="showcase-card">
+                    <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80" alt="Electricidad">
+                    <div class="showcase-card__label">
+                        <h3>Electricidad</h3>
+                        <span>Instalaciones, reparaciones y más</span>
+                    </div>
+                </a>
+                <a th:href="@{/servicios}" class="showcase-card">
+                    <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80" alt="Obra">
+                    <div class="showcase-card__label">
+                        <h3>Obra</h3>
+                        <span>Construcción y remodelación</span>
+                    </div>
+                </a>
+                <a th:href="@{/servicios}" class="showcase-card">
+                    <img src="https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=600&q=80" alt="Plomería">
+                    <div class="showcase-card__label">
+                        <h3>Plomería</h3>
+                        <span>Mantenimiento y emergencias</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA BLOCK -->
+    <section style="padding:0 0 64px">
+        <div class="container" style="max-width:1200px">
+            <div class="cta-block">
+                <div class="cta-card" style="background:var(--primary-color);color:#fff">
+                    <h2>¿Necesitas un servicio?</h2>
+                    <p>Publica lo que necesitas y recibe cotizaciones de profesionales en minutos.</p>
+                    <div>
+                        <a th:href="@{/servicios/nuevo}" class="btn-brixo btn-brixo--warm">
+                            <i class="fas fa-plus-circle"></i> Publicar solicitud
+                        </a>
+                    </div>
+                </div>
+                <div class="cta-card" style="background:var(--neutral-900);color:#fff">
+                    <h2>¿Eres profesional?</h2>
+                    <p>Únete a Brixo y conecta con clientes que buscan tus servicios.</p>
+                    <div>
+                        <a th:href="@{/login}" class="btn-brixo btn-brixo--warm" sec:authorize="!isAuthenticated()">
+                            <i class="fas fa-user-plus"></i> Ingresar / Registrarse
+                        </a>
+                        <a th:href="@{/dashboard}" class="btn-brixo btn-brixo--warm" sec:authorize="isAuthenticated()">
+                            <i class="fas fa-tachometer-alt"></i> Ir a mi panel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div th:replace="~{fragments/navbar :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div th:replace="~{fragments/navbar :: navbarJs}"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hero = document.getElementById('hero');
+            if (hero) setTimeout(() => hero.classList.add('loaded'), 100);
+        });
+    </script>
+
 </body>
 </html>
