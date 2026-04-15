@@ -194,9 +194,7 @@
             <a class="active" th:href="@{/dashboard}">Inicio</a>
             <a th:href="@{/servicios}">Servicios</a>
             <a th:href="@{/servicios/nuevo}">Publicar tarea</a>
-            <a th:href="@{/servicios}">Mis tareas</a>
-            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/usuarios}">Usuarios</a>
-            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/usuarios}">Roles</a>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/usuarios}">Gestionar usuarios</a>
         </nav>
     </aside>
 

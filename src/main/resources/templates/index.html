@@ -194,13 +194,16 @@
                         <p class="brixo-hero__subtitle">Reserva por horas a expertos en obra, carpintería, plomería y más. Publica tu necesidad o reserva de inmediato.</p>
                         <div class="brixo-hero__actions">
                             <a th:href="@{/servicios}" class="btn-brixo btn-brixo--warm">
-                                <i class="fas fa-map-marked-alt"></i> Explorar Taskers
+                                <i class="fas fa-search"></i> Explorar servicios
                             </a>
                             <a th:href="@{/servicios/nuevo}" class="btn-brixo btn-brixo--outline">
                                 <i class="fas fa-plus-circle"></i> Publicar tarea
                             </a>
-                            <a th:href="@{/servicios}" class="btn-brixo btn-brixo--outline">
-                                Ser Tasker
+                            <a th:href="@{/login}" class="btn-brixo btn-brixo--outline" sec:authorize="!isAuthenticated()">
+                                <i class="fas fa-user-plus"></i> Registrarme
+                            </a>
+                            <a th:href="@{/dashboard}" class="btn-brixo btn-brixo--outline" sec:authorize="isAuthenticated()">
+                                <i class="fas fa-th-large"></i> Mi panel
                             </a>
                         </div>
                     </div>
