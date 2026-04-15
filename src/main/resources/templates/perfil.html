@@ -118,14 +118,14 @@
                     </div>
 
                     <div class="field">
-                        <label for="ciudad"><i class="fas fa-city"></i> Ciudad</label>
-                        <input id="ciudad" name="ciudad" type="text" th:value="${usuario.ciudad}" maxlength="100" placeholder="Ej: Ciudad de México">
+                        <label for="ciudad"><i class="fas fa-city"></i> Ciudad <span class="req">*</span></label>
+                        <input id="ciudad" name="ciudad" type="text" th:value="${usuario.ciudad}" required minlength="2" maxlength="100" placeholder="Ej: Ciudad de México">
                         <div class="err" id="ciudadError">La ciudad debe tener entre 2 y 100 caracteres</div>
                     </div>
 
                     <div class="field" style="grid-column:1/-1">
-                        <label for="direccion"><i class="fas fa-map-marker-alt"></i> Dirección</label>
-                        <input id="direccion" name="direccion" type="text" th:value="${usuario.direccion}" maxlength="200" placeholder="Ej: Calle Principal 123, Col. Centro">
+                        <label for="direccion"><i class="fas fa-map-marker-alt"></i> Dirección <span class="req">*</span></label>
+                        <input id="direccion" name="direccion" type="text" th:value="${usuario.direccion}" required minlength="2" maxlength="200" placeholder="Ej: Calle Principal 123, Col. Centro">
                         <div class="err" id="direccionError">La dirección debe tener entre 2 y 200 caracteres</div>
                     </div>
 
@@ -223,8 +223,8 @@
         nombre:    { test: v => v.length >= 3 && v.length <= 100, msgId: 'nombreError' },
         email:     { test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), msgId: 'emailError' },
         telefono:  { test: v => /^[0-9]{10}$/.test(v), msgId: 'telefonoError' },
-        ciudad:    { test: v => v === '' || (v.length >= 2 && v.length <= 100), msgId: 'ciudadError', optional: true },
-        direccion: { test: v => v === '' || (v.length >= 2 && v.length <= 200), msgId: 'direccionError', optional: true },
+        ciudad:    { test: v => v.length >= 2 && v.length <= 100, msgId: 'ciudadError' },
+        direccion: { test: v => v.length >= 2 && v.length <= 200, msgId: 'direccionError' },
         password:  { test: v => v === '' || v.length >= 6, msgId: 'passwordError', optional: true }
     };
 

@@ -43,12 +43,14 @@ public class Usuario {
     @Column(nullable = false, length = 10)
     private String telefono;
 
+    @NotBlank(message = "La dirección es obligatoria")
     @Size(min = 2, max = 200, message = "La dirección debe tener entre 2 y 200 caracteres")
-    @Column(length = 200)
+    @Column(nullable = false, length = 200)
     private String direccion;
 
+    @NotBlank(message = "La ciudad es obligatoria")
     @Size(min = 2, max = 100, message = "La ciudad debe tener entre 2 y 100 caracteres")
-    @Column(length = 100)
+    @Column(nullable = false, length = 100)
     private String ciudad;
 
     @Column(nullable = false, length = 120)

@@ -120,15 +120,15 @@
                     </div>
 
                     <div class="field">
-                        <label for="ciudad"><i class="fas fa-city"></i> Ciudad</label>
-                        <input id="ciudad" type="text" th:field="*{ciudad}" maxlength="100" placeholder="Ej: Ciudad de México">
+                        <label for="ciudad"><i class="fas fa-city"></i> Ciudad <span class="req">*</span></label>
+                        <input id="ciudad" type="text" th:field="*{ciudad}" required minlength="2" maxlength="100" placeholder="Ej: Ciudad de México">
                         <div class="err" id="ciudadError">La ciudad debe tener entre 2 y 100 caracteres</div>
                         <div class="err show" th:if="${#fields.hasErrors('ciudad')}" th:errors="*{ciudad}"></div>
                     </div>
 
                     <div class="field" style="grid-column:1/-1">
-                        <label for="direccion"><i class="fas fa-map-marker-alt"></i> Dirección</label>
-                        <input id="direccion" type="text" th:field="*{direccion}" maxlength="200" placeholder="Ej: Calle Principal 123, Col. Centro">
+                        <label for="direccion"><i class="fas fa-map-marker-alt"></i> Dirección <span class="req">*</span></label>
+                        <input id="direccion" type="text" th:field="*{direccion}" required minlength="2" maxlength="200" placeholder="Ej: Calle Principal 123, Col. Centro">
                         <div class="err" id="direccionError">La dirección debe tener entre 2 y 200 caracteres</div>
                         <div class="err show" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></div>
                     </div>
@@ -211,13 +211,8 @@
             return;
         }
 
-        // Campo ciudad: mín 2 caracteres
+        // Campo ciudad: obligatorio, mín 2 caracteres
         if (f.id === 'ciudad') {
-            if (v === '') {
-                f.classList.remove('is-invalid', 'is-valid');
-                if (err) err.classList.remove('show');
-                return;
-            }
             const ok = v.length >= 2 && v.length <= 100;
             f.classList.toggle('is-invalid', !ok);
             f.classList.toggle('is-valid', ok);
@@ -225,13 +220,8 @@
             return;
         }
 
-        // Campo dirección: mín 2 caracteres
+        // Campo dirección: obligatorio, mín 2 caracteres
         if (f.id === 'direccion') {
-            if (v === '') {
-                f.classList.remove('is-invalid', 'is-valid');
-                if (err) err.classList.remove('show');
-                return;
-            }
             const ok = v.length >= 2 && v.length <= 200;
             f.classList.toggle('is-invalid', !ok);
             f.classList.toggle('is-valid', ok);
