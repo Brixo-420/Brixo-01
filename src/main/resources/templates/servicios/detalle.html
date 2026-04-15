@@ -41,6 +41,7 @@
         /* Badge */
         .svc-badge { display:inline-flex; align-items:center; gap:.3rem; padding:.35rem .8rem; border-radius:8px; font-size:.82rem; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
         .svc-badge.abierto { background:rgba(245,158,11,.15); color:#b45309; }
+        .svc-badge.en_cotizacion { background:rgba(99,102,241,.15); color:#4338ca; }
         .svc-badge.en_proceso { background:rgba(14,165,233,.15); color:#0369a1; }
         .svc-badge.cerrado { background:rgba(16,185,129,.15); color:#047857; }
 
@@ -80,6 +81,26 @@
         .btn-bx-outline:hover { border-color:var(--primary); color:var(--primary); }
 
         .bx-alert-err { border-radius:10px; padding:.7rem 1rem; font-weight:600; font-size:.9rem; margin-bottom:1.2rem; background:rgba(239,68,68,.1); color:#b91c1c; border:1px solid rgba(239,68,68,.2); display:flex; align-items:center; gap:.5rem; }
+        .bx-alert-ok { border-radius:10px; padding:.7rem 1rem; font-weight:600; font-size:.9rem; margin-bottom:1.2rem; background:rgba(16,185,129,.1); color:#047857; border:1px solid rgba(16,185,129,.2); display:flex; align-items:center; gap:.5rem; }
+
+        /* Cotizaciones */
+        .cot-card { background:#f8fafc; border:1px solid var(--border); border-radius:12px; padding:1rem 1.2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; transition:all .2s; }
+        .cot-card:hover { border-color:var(--primary); box-shadow:0 2px 8px rgba(14,165,233,.08); }
+        .cot-info { flex:1; }
+        .cot-name { font-weight:700; font-size:.95rem; }
+        .cot-email { font-size:.8rem; color:var(--muted); }
+        .cot-msg { font-size:.85rem; color:var(--text); margin-top:.3rem; font-style:italic; }
+        .cot-date { font-size:.75rem; color:var(--muted); }
+        .cot-monto { font-size:1.2rem; font-weight:800; color:var(--success); white-space:nowrap; }
+        .cot-badge { padding:.2rem .5rem; border-radius:6px; font-size:.72rem; font-weight:700; text-transform:uppercase; }
+        .cot-badge.pendiente { background:rgba(245,158,11,.12); color:#b45309; }
+        .cot-badge.aceptada { background:rgba(16,185,129,.12); color:#047857; }
+        .cot-badge.rechazada { background:rgba(239,68,68,.12); color:#b91c1c; }
+        .cot-actions { display:flex; gap:.3rem; }
+        .cot-form-card { background:linear-gradient(135deg,rgba(14,165,233,.04),rgba(99,102,241,.04)); border:2px dashed var(--primary); border-radius:12px; padding:1.2rem; }
+        .cot-form-card label { font-size:.82rem; font-weight:700; color:var(--muted); text-transform:uppercase; }
+        .cot-form-card input, .cot-form-card textarea { border:1.5px solid var(--border); border-radius:9px; padding:.55rem .8rem; font:inherit; font-size:.9rem; width:100%; }
+        .cot-form-card input:focus, .cot-form-card textarea:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(14,165,233,.12); }
 
         @media (max-width:640px) {
             .info-grid, .people-grid { grid-template-columns:1fr; }
@@ -94,6 +115,7 @@
 <div class="page-wrap">
 
     <div th:if="${error}" class="bx-alert-err"><i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span></div>
+    <div th:if="${ok}" class="bx-alert-ok"><i class="fas fa-check-circle"></i> <span th:text="${ok}"></span></div>
 
     <!-- HERO -->
     <div class="detail-hero">
@@ -114,7 +136,7 @@
             <div class="info-grid">
                 <div class="info-item">
                     <div class="label">Estado</div>
-                    <div><span class="svc-badge" th:classappend="${#strings.toLowerCase(servicio.estado.name().replace('_','-'))}" th:text="${servicio.estado}"></span></div>
+                    <div><span class="svc-badge" th:classappend="${#strings.toLowerCase(servicio.estado.name())}" th:text="${servicio.estado}"></span></div>
                 </div>
                 <div class="info-item">
                     <div class="label">Tipo</div>
@@ -163,17 +185,79 @@
         <div class="desc-text" th:text="${servicio.descripcion}"></div>
     </div>
 
+    <!-- COTIZACIONES -->
+    <div class="d-card">
+        <div class="d-card-title"><i class="fas fa-file-invoice-dollar"></i> Cotizaciones</div>
+
+        <!-- Formulario cotizar (solo contratista, servicio ABIERTO, sin cotización pendiente) -->
+        <div th:if="${esContratista and servicio.estado.name() == 'ABIERTO' and !yaCotizo}" class="cot-form-card" style="margin-bottom:1rem">
+            <form th:action="@{/servicios/{id}/cotizar(id=${servicio.id})}" method="post">
+                <div style="display:grid;grid-template-columns:1fr 2fr;gap:.8rem;align-items:end">
+                    <div>
+                        <label for="monto">Tu precio ($)</label>
+                        <input id="monto" name="monto" type="number" step="0.01" min="1" required placeholder="Ej: 150000">
+                    </div>
+                    <div>
+                        <label for="mensaje">Mensaje (opcional)</label>
+                        <input id="mensaje" name="mensaje" type="text" maxlength="500" placeholder="Describe tu propuesta...">
+                    </div>
+                </div>
+                <button type="submit" class="btn-bx btn-bx-success" style="margin-top:.8rem" onclick="return confirm('¿Enviar esta cotización?')">
+                    <i class="fas fa-paper-plane"></i> Enviar cotización
+                </button>
+            </form>
+        </div>
+
+        <div th:if="${esContratista and yaCotizo}" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:.8rem 1rem;margin-bottom:1rem;font-size:.9rem;font-weight:600;color:#92400e;display:flex;align-items:center;gap:.5rem">
+            <i class="fas fa-clock"></i> Ya enviaste una cotización pendiente para este servicio
+        </div>
+
+        <!-- Lista de cotizaciones -->
+        <div th:if="${!#lists.isEmpty(cotizaciones)}" style="display:flex;flex-direction:column;gap:.6rem">
+            <div class="cot-card" th:each="c : ${cotizaciones}">
+                <div class="cot-info">
+                    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+                        <span class="cot-name" th:text="${c.contratista.nombre}"></span>
+                        <span class="cot-badge" th:classappend="${#strings.toLowerCase(c.estado.name())}" th:text="${c.estado}"></span>
+                    </div>
+                    <div class="cot-email" th:text="${c.contratista.email}"></div>
+                    <div th:if="${c.mensaje != null and !c.mensaje.isBlank()}" class="cot-msg" th:text="${c.mensaje}"></div>
+                    <div class="cot-date" th:text="'Enviada: ' + ${#temporals.format(c.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></div>
+                </div>
+                <div style="text-align:right">
+                    <div class="cot-monto" th:text="'$' + ${#numbers.formatDecimal(c.monto, 1, 'POINT', 2, 'COMMA')}"></div>
+                    <!-- Solo el cliente dueño puede aceptar/rechazar cotizaciones pendientes -->
+                    <div th:if="${esClientePropietario and c.estado.name() == 'PENDIENTE'}" class="cot-actions" style="margin-top:.4rem">
+                        <form th:action="@{/servicios/cotizaciones/{cid}/aceptar(cid=${c.id})}" method="post" style="display:inline">
+                            <input type="hidden" name="servicioId" th:value="${servicio.id}">
+                            <button type="submit" class="btn-bx btn-bx-success btn-bx-sm" onclick="return confirm('¿Aceptar esta cotización?')">
+                                <i class="fas fa-check"></i> Aceptar
+                            </button>
+                        </form>
+                        <form th:action="@{/servicios/cotizaciones/{cid}/rechazar(cid=${c.id})}" method="post" style="display:inline">
+                            <input type="hidden" name="servicioId" th:value="${servicio.id}">
+                            <button type="submit" class="btn-bx btn-bx-danger btn-bx-sm" onclick="return confirm('¿Rechazar esta cotización?')">
+                                <i class="fas fa-times"></i> Rechazar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(cotizaciones)}" style="text-align:center;padding:1rem;color:var(--muted);font-size:.9rem">
+            <i class="fas fa-inbox" style="font-size:1.5rem;opacity:.4;display:block;margin-bottom:.4rem"></i>
+            Aún no hay cotizaciones para este servicio
+        </div>
+    </div>
+
     <!-- ACCIONES -->
     <div class="d-card">
         <div class="d-card-title"><i class="fas fa-bolt"></i> Acciones</div>
         <div class="actions-bar">
-            <form th:if="${esContratista and servicio.estado.name() == 'ABIERTO' and servicio.contratistaAsignado == null}"
-                  th:action="@{/servicios/{id}/asignarme(id=${servicio.id})}" method="post" style="display:inline">
-                <button type="submit" class="btn-bx btn-bx-success"><i class="fas fa-hand-paper"></i> Asignarme al servicio</button>
-            </form>
-            <form th:if="${esContratista and servicio.estado.name() == 'ABIERTO' and esContratistaAsignado}"
+            <form th:if="${esContratista and servicio.estado.name() == 'EN_COTIZACION' and esContratistaAsignado}"
                   th:action="@{/servicios/{id}/iniciar(id=${servicio.id})}" method="post" style="display:inline">
-                <button type="submit" class="btn-bx btn-bx-success"><i class="fas fa-play"></i> Iniciar trabajo</button>
+                <button type="submit" class="btn-bx btn-bx-success" onclick="return confirm('¿Iniciar el trabajo? Se notificará al cliente.')"><i class="fas fa-play"></i> Iniciar trabajo</button>
             </form>
             <form th:if="${esContratista and servicio.estado.name() == 'EN_PROCESO' and esContratistaAsignado}"
                   th:action="@{/servicios/{id}/finalizar(id=${servicio.id})}" method="post" style="display:inline">

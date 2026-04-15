@@ -19,10 +19,12 @@ public class ServicioService {
 
     private final ServicioRepository servicioRepository;
     private final UsuarioRepository usuarioRepository;
+    private final NotificacionService notificacionService;
 
-    public ServicioService(ServicioRepository servicioRepository, UsuarioRepository usuarioRepository) {
+    public ServicioService(ServicioRepository servicioRepository, UsuarioRepository usuarioRepository, NotificacionService notificacionService) {
         this.servicioRepository = servicioRepository;
         this.usuarioRepository = usuarioRepository;
+        this.notificacionService = notificacionService;
     }
 
     public List<Servicio> listarFiltrados(String titulo, String estado, String emailCliente, String usuarioActualEmail, boolean esAdmin, boolean esCliente) {
@@ -98,8 +100,8 @@ public class ServicioService {
     public void asignarContratista(Long id, String emailContratista, boolean esAdmin) {
         Servicio actual = buscarPorId(id);
 
-        if (actual.getEstado() != EstadoServicio.ABIERTO) {
-            throw new IllegalArgumentException("Solo se pueden asignar contratistas a servicios ABIERTO");
+        if (actual.getEstado() != EstadoServicio.ABIERTO && actual.getEstado() != EstadoServicio.EN_COTIZACION) {
+            throw new IllegalArgumentException("Solo se pueden asignar contratistas a servicios ABIERTO o EN_COTIZACION");
         }
 
         Usuario contratista = usuarioRepository.findByEmail(emailContratista)
@@ -121,14 +123,21 @@ public class ServicioService {
     @Transactional
     public void iniciarServicio(Long id, String emailUsuarioActual, boolean esAdmin) {
         Servicio actual = buscarPorId(id);
-        if (actual.getEstado() != EstadoServicio.ABIERTO) {
-            throw new IllegalArgumentException("Solo se pueden iniciar servicios en estado ABIERTO");
+        if (actual.getEstado() != EstadoServicio.ABIERTO && actual.getEstado() != EstadoServicio.EN_COTIZACION) {
+            throw new IllegalArgumentException("Solo se pueden iniciar servicios en estado ABIERTO o EN_COTIZACION");
         }
 
         validarContratistaAsignado(actual, emailUsuarioActual, esAdmin);
 
         actual.setEstado(EstadoServicio.EN_PROCESO);
         servicioRepository.save(actual);
+
+        // Notificar al cliente que el contratista inició el trabajo
+        if (actual.getCliente() != null && actual.getContratistaAsignado() != null) {
+            notificacionService.crear(actual.getCliente().getEmail(),
+                    actual.getContratistaAsignado().getNombre() + " ha iniciado el trabajo en \"" + actual.getTitulo() + "\"",
+                    "/servicios/" + actual.getId() + "/detalle");
+        }
     }
 
     @Transactional

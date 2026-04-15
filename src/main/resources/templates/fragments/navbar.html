@@ -25,6 +25,14 @@
         <!-- Acciones derecha -->
         <div class="bn__actions">
 
+            <!-- Campana de notificaciones -->
+            <div sec:authorize="isAuthenticated()" style="position:relative;margin-right:.5rem">
+                <a th:href="@{/notificaciones}" style="color:inherit;font-size:1.2rem;position:relative;text-decoration:none" title="Notificaciones">
+                    <i class="fas fa-bell"></i>
+                    <span id="notifBadge" style="display:none;position:absolute;top:-6px;right:-8px;background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;font-weight:800;text-align:center;line-height:18px"></span>
+                </a>
+            </div>
+
             <!-- Usuario autenticado -->
             <div class="bn__user" id="bnUser" sec:authorize="isAuthenticated()">
                 <button class="bn__user-toggle" id="bnUserToggle"
@@ -41,6 +49,7 @@
                 </button>
                 <div class="bn__dropdown" id="bnDropdown" role="menu">
                     <a th:href="@{/dashboard}" class="bn__dropdown-item" role="menuitem"><i class="fas fa-th-large"></i> Mi Panel</a>
+                    <a th:href="@{/notificaciones}" class="bn__dropdown-item" role="menuitem"><i class="fas fa-bell"></i> Notificaciones</a>
                     <div class="bn__dropdown-divider" sec:authorize="hasRole('ADMIN')"></div>
                     <a th:href="@{/admin/usuarios}" class="bn__dropdown-item" role="menuitem" sec:authorize="hasRole('ADMIN')"><i class="fas fa-users-cog"></i> Usuarios</a>
                     <a th:href="@{/admin/solicitudes}" class="bn__dropdown-item" role="menuitem" sec:authorize="hasRole('ADMIN')"><i class="fas fa-user-tie"></i> Solicitudes</a>
@@ -173,6 +182,26 @@
             userBtn.setAttribute('aria-expanded', userDd.classList.contains('open'));
         });
         document.addEventListener('click', () => userDd.classList.remove('open'));
+    }
+
+    // Polling de notificaciones
+    const badge = document.getElementById('notifBadge');
+    if (badge) {
+        function checkNotifs() {
+            fetch('/notificaciones/count')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.count > 0) {
+                        badge.textContent = data.count > 9 ? '9+' : data.count;
+                        badge.style.display = 'block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(() => {});
+        }
+        checkNotifs();
+        setInterval(checkNotifs, 15000);
     }
 })();
 </script>

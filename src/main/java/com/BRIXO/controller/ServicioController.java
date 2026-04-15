@@ -3,6 +3,7 @@ package com.BRIXO.controller;
 import com.BRIXO.model.EstadoServicio;
 import com.BRIXO.model.Servicio;
 import com.BRIXO.model.TipoServicio;
+import com.BRIXO.service.CotizacionService;
 import com.BRIXO.service.ServicioService;
 import jakarta.validation.Valid;
 import org.apache.poi.ss.usermodel.Cell;
@@ -43,9 +44,11 @@ import java.util.Arrays;
 public class ServicioController {
 
     private final ServicioService servicioService;
+    private final CotizacionService cotizacionService;
 
-    public ServicioController(ServicioService servicioService) {
+    public ServicioController(ServicioService servicioService, CotizacionService cotizacionService) {
         this.servicioService = servicioService;
+        this.cotizacionService = cotizacionService;
     }
 
     @GetMapping
@@ -255,12 +258,19 @@ public class ServicioController {
                 return "redirect:/servicios";
             }
             
+            var cotizaciones = cotizacionService.listarPorServicio(id);
+            boolean yaCotizo = esContratista && cotizaciones.stream()
+                    .anyMatch(c -> c.getContratista().getEmail().equals(emailActual)
+                            && c.getEstado() == com.BRIXO.model.EstadoCotizacion.PENDIENTE);
+
             model.addAttribute("servicio", servicio);
             model.addAttribute("esAdmin", esAdmin);
             model.addAttribute("esCliente", esCliente);
             model.addAttribute("esContratista", esContratista);
             model.addAttribute("esClientePropietario", esClientePropietario);
             model.addAttribute("esContratistaAsignado", esContratistaAsignado);
+            model.addAttribute("cotizaciones", cotizaciones);
+            model.addAttribute("yaCotizo", yaCotizo);
             return "servicios/detalle";
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
@@ -337,7 +347,7 @@ public class ServicioController {
     public String iniciarServicio(@PathVariable Long id, Authentication authentication, RedirectAttributes redirectAttributes) {
         if (!puedeGestionarEstado(authentication)) {
             redirectAttributes.addFlashAttribute("error", "No tienes permisos para iniciar servicios");
-            return "redirect:/servicios";
+            return "redirect:/servicios/" + id + "/detalle";
         }
 
         try {
@@ -347,7 +357,7 @@ public class ServicioController {
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
         }
-        return "redirect:/servicios";
+        return "redirect:/servicios/" + id + "/detalle";
     }
 
     @PostMapping("/{id}/finalizar")

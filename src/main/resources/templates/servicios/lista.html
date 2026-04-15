@@ -77,6 +77,7 @@
 
         .svc-card-top { height:4px; }
         .svc-card-top.abierto { background:linear-gradient(90deg,var(--warning),#fbbf24); }
+        .svc-card-top.en_cotizacion { background:linear-gradient(90deg,var(--secondary),#818cf8); }
         .svc-card-top.en_proceso { background:linear-gradient(90deg,var(--primary),var(--secondary)); }
         .svc-card-top.cerrado { background:linear-gradient(90deg,var(--success),#34d399); }
 
@@ -88,6 +89,7 @@
 
         .svc-badge { display:inline-flex; align-items:center; gap:.3rem; padding:.25rem .65rem; border-radius:6px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
         .svc-badge.abierto { background:rgba(245,158,11,.12); color:#b45309; }
+        .svc-badge.en_cotizacion { background:rgba(99,102,241,.12); color:#4338ca; }
         .svc-badge.en_proceso { background:rgba(14,165,233,.12); color:#0369a1; }
         .svc-badge.cerrado { background:rgba(16,185,129,.12); color:#047857; }
 
@@ -210,13 +212,13 @@
                 <a class="btn-bx btn-bx-outline btn-bx-sm" th:href="@{/servicios/{id}/detalle(id=${s.id})}">
                     <i class="fas fa-eye"></i> Ver
                 </a>
-                <form th:if="${esContratista and s.estado.name() == 'ABIERTO' and (s.contratistaAsignado == null or s.contratistaAsignado.email == #authentication.name)}"
-                      th:action="@{/servicios/{id}/asignarme(id=${s.id})}" method="post" class="d-inline">
-                    <button type="submit" class="btn-bx btn-bx-outline btn-bx-sm"><i class="fas fa-hand-paper"></i> Asignarme</button>
-                </form>
-                <form th:if="${(esContratista or esAdmin) and s.estado.name() == 'ABIERTO' and s.contratistaAsignado != null and (esAdmin or s.contratistaAsignado.email == #authentication.name)}"
+                <a th:if="${esContratista and s.estado.name() == 'ABIERTO'}"
+                   class="btn-bx btn-bx-success btn-bx-sm" th:href="@{/servicios/{id}/detalle(id=${s.id})}">
+                    <i class="fas fa-file-invoice-dollar"></i> Cotizar
+                </a>
+                <form th:if="${(esContratista or esAdmin) and s.estado.name() == 'EN_COTIZACION' and s.contratistaAsignado != null and (esAdmin or s.contratistaAsignado.email == #authentication.name)}"
                       th:action="@{/servicios/{id}/iniciar(id=${s.id})}" method="post" class="d-inline">
-                    <button type="submit" class="btn-bx btn-bx-success btn-bx-sm"><i class="fas fa-play"></i> Iniciar</button>
+                    <button type="submit" class="btn-bx btn-bx-success btn-bx-sm" onclick="return confirm('¿Iniciar trabajo?')"><i class="fas fa-play"></i> Iniciar</button>
                 </form>
                 <form th:if="${(esContratista or esAdmin) and s.estado.name() == 'EN_PROCESO' and s.contratistaAsignado != null and (esAdmin or s.contratistaAsignado.email == #authentication.name)}"
                       th:action="@{/servicios/{id}/finalizar(id=${s.id})}" method="post" class="d-inline">

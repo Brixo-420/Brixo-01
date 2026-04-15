@@ -1,5 +1,6 @@
 package com.BRIXO.controller;
 
+import com.BRIXO.service.NotificacionService;
 import com.BRIXO.service.SolicitudContratistaService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,9 +13,11 @@ import org.springframework.web.servlet.view.RedirectView;
 public class HomeController {
 
     private final SolicitudContratistaService solicitudService;
+    private final NotificacionService notificacionService;
 
-    public HomeController(SolicitudContratistaService solicitudService) {
+    public HomeController(SolicitudContratistaService solicitudService, NotificacionService notificacionService) {
         this.solicitudService = solicitudService;
+        this.notificacionService = notificacionService;
     }
 
     @GetMapping({"/", "/home"})
@@ -28,6 +31,8 @@ public class HomeController {
             String email = authentication.getName();
             boolean esCliente = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_CLIENTE"));
             boolean esAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+            model.addAttribute("notificacionesNoLeidas", notificacionService.contarNoLeidas(email));
 
             if (esCliente) {
                 model.addAttribute("solicitudPendiente", solicitudService.tieneSolicitudPendiente(email));
