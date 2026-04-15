@@ -90,6 +90,33 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
+    public Usuario buscarPorEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+    }
+
+    @Transactional
+    public Usuario actualizarPerfil(String emailActual, String nuevoNombre, String nuevoEmail, String nuevoTelefono, String nuevaPassword) {
+        Usuario actual = buscarPorEmail(emailActual);
+
+        if (!actual.getEmail().equals(nuevoEmail) && usuarioRepository.existsByEmail(nuevoEmail)) {
+            throw new IllegalArgumentException("El correo ya está registrado");
+        }
+
+        actual.setNombre(nuevoNombre);
+        actual.setEmail(nuevoEmail);
+        actual.setTelefono(nuevoTelefono);
+
+        if (nuevaPassword != null && !nuevaPassword.isBlank()) {
+            if (nuevaPassword.length() < 6) {
+                throw new IllegalArgumentException("La contraseña debe tener mínimo 6 caracteres");
+            }
+            actual.setPassword(passwordEncoder.encode(nuevaPassword));
+        }
+
+        return usuarioRepository.save(actual);
+    }
+
     private Rol obtenerRol(Long rolId) {
         if (rolId == null) {
             throw new IllegalArgumentException("Debe seleccionar un rol");

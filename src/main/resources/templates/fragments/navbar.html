@@ -59,6 +59,7 @@
                 </button>
                 <div class="bn__dropdown" id="bnDropdown" role="menu">
                     <a th:href="@{/dashboard}" class="bn__dropdown-item" role="menuitem"><i class="fas fa-th-large"></i> Mi Panel</a>
+                    <a th:href="@{/perfil}" class="bn__dropdown-item" role="menuitem"><i class="fas fa-id-card"></i> Mi Perfil</a>
                     <a th:href="@{/notificaciones}" class="bn__dropdown-item" role="menuitem"><i class="fas fa-bell"></i> Notificaciones</a>
                     <!-- Cambiar Rol -->
                     <div th:if="${contratistaAprobado}" class="bn__dropdown-divider"></div>
@@ -115,6 +116,7 @@
             </div>
             <div class="bn__mobile-actions">
                 <a th:href="@{/dashboard}" class="bn__dropdown-item"><i class="fas fa-th-large"></i> Mi Panel</a>
+                <a th:href="@{/perfil}" class="bn__dropdown-item"><i class="fas fa-id-card"></i> Mi Perfil</a>
                 <!-- Cambiar Rol (móvil) -->
                 <form th:if="${contratistaAprobado}" th:action="@{/cambiar-rol}" method="post" style="margin:0;padding:8px 16px">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
