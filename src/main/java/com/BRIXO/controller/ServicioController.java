@@ -201,24 +201,6 @@ public class ServicioController {
                 r.setHeightInPoints(i == 1 ? 8 : 22);
             }
 
-            // ── Insertar logo ──
-            try {
-                ClassPathResource logoRes = new ClassPathResource("static/images/logo empresa brixo.jpg");
-                if (logoRes.exists()) {
-                    try (InputStream logoStream = logoRes.getInputStream()) {
-                        byte[] logoBytes = IOUtils.toByteArray(logoStream);
-                        int pictureIdx = workbook.addPicture(logoBytes, Workbook.PICTURE_TYPE_JPEG);
-                        XSSFDrawing drawing = (XSSFDrawing) sheet.createDrawingPatriarch();
-                        XSSFClientAnchor anchor = new XSSFClientAnchor(
-                            0, 50000, 0, 0,
-                            0, 1, 3, 5
-                        );
-                        anchor.setAnchorType(XSSFClientAnchor.AnchorType.MOVE_AND_RESIZE);
-                        drawing.createPicture(anchor, pictureIdx);
-                    }
-                }
-            } catch (Exception ignored) { }
-
             // ══════════ TÍTULO ══════════
             Row titleRow = sheet.createRow(5);
             titleRow.setHeightInPoints(36);
