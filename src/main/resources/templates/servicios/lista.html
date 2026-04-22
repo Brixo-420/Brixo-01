@@ -129,7 +129,7 @@
     <div class="page-header">
         <h1><i class="fas fa-briefcase"></i> Servicios</h1>
         <div class="header-actions">
-            <a th:if="${esCliente or esAdmin}" th:href="@{/servicios/nuevo}" class="btn-bx btn-bx-primary">
+            <a th:if="${esCliente}" th:href="@{/servicios/nuevo}" class="btn-bx btn-bx-primary">
                 <i class="fas fa-plus"></i> Nuevo servicio
             </a>
         </div>
@@ -221,11 +221,11 @@
                       th:action="@{/servicios/{id}/finalizar(id=${s.id})}" method="post" class="d-inline">
                     <button type="submit" class="btn-bx btn-bx-success btn-bx-sm"><i class="fas fa-check"></i> Finalizar</button>
                 </form>
-                <a th:if="${esAdmin or (esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name and s.contratistaAsignado == null)}"
+                <a th:if="${esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name and s.contratistaAsignado == null}"
                    class="btn-bx btn-bx-outline btn-bx-sm" th:href="@{/servicios/{id}/editar(id=${s.id})}">
                     <i class="fas fa-edit"></i> Editar
                 </a>
-                <form th:if="${esAdmin or (esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name and s.contratistaAsignado == null)}"
+                <form th:if="${esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name and s.contratistaAsignado == null}"
                       th:action="@{/servicios/{id}/eliminar(id=${s.id})}" method="post" class="d-inline">
                     <button type="submit" class="btn-bx btn-bx-danger btn-bx-sm" onclick="return confirm('¿Eliminar servicio?')">
                         <i class="fas fa-trash"></i>
@@ -239,7 +239,7 @@
     <div th:if="${#lists.isEmpty(servicios)}" class="empty-state">
         <i class="fas fa-inbox"></i>
         <p>No se encontraron servicios</p>
-        <a th:if="${esCliente or esAdmin}" th:href="@{/servicios/nuevo}" class="btn-bx btn-bx-primary" style="margin-top:.5rem">
+        <a th:if="${esCliente}" th:href="@{/servicios/nuevo}" class="btn-bx btn-bx-primary" style="margin-top:.5rem">
             <i class="fas fa-plus"></i> Crear el primero
         </a>
     </div>

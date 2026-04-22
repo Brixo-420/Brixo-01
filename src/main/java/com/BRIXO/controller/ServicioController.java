@@ -93,7 +93,7 @@ public class ServicioController {
             RedirectAttributes redirectAttributes
     ) {
         if (!puedeEditar(authentication)) {
-            redirectAttributes.addFlashAttribute("error", "Solo CLIENTE o ADMIN pueden crear servicios");
+            redirectAttributes.addFlashAttribute("error", "Solo CLIENTE puede crear servicios");
             return "redirect:/servicios";
         }
 
@@ -700,7 +700,7 @@ public class ServicioController {
     }
 
     private boolean puedeEditar(Authentication authentication) {
-        return tieneRol(authentication, "ROLE_ADMIN") || tieneRol(authentication, "ROLE_CLIENTE");
+        return tieneRol(authentication, "ROLE_CLIENTE");
     }
 
     private boolean puedeGestionarEstado(Authentication authentication) {
