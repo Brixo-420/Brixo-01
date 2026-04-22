@@ -196,7 +196,7 @@
                             <a th:href="@{/servicios}" class="btn-brixo btn-brixo--warm">
                                 <i class="fas fa-search"></i> Explorar servicios
                             </a>
-                            <a th:href="@{/servicios/nuevo}" class="btn-brixo btn-brixo--outline">
+                            <a th:href="@{/servicios/nuevo}" class="btn-brixo btn-brixo--outline" sec:authorize="!hasRole('ROLE_ADMIN')">
                                 <i class="fas fa-plus-circle"></i> Publicar tarea
                             </a>
                             <a th:href="@{/login}" class="btn-brixo btn-brixo--outline" sec:authorize="!isAuthenticated()">
