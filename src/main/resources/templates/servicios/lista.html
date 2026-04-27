@@ -161,9 +161,7 @@
                 <div class="filter-actions">
                     <button type="submit" class="btn-bx btn-bx-primary"><i class="fas fa-search"></i> Filtrar</button>
                     <a class="btn-bx btn-bx-outline" th:href="@{/servicios}"><i class="fas fa-times"></i></a>
-                    <a class="btn-bx btn-bx-outline"
-                       th:href="@{/servicios/reporte.xlsx(titulo=${titulo},estado=${estado},emailCliente=${emailCliente})}"
-                       title="Exportar Excel"><i class="fas fa-file-excel"></i> Excel</a>
+                    <button type="button" class="btn-bx btn-bx-outline" title="Exportar Excel" disabled><i class="fas fa-file-excel"></i> Excel</button>
                 </div>
             </div>
         </form>
