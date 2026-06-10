@@ -42,6 +42,9 @@ public class DataInitializer implements CommandLineRunner {
             Usuario admin = new Usuario();
             admin.setNombre("Administrador Brixo");
             admin.setEmail("admin@brixo.com");
+            admin.setTelefono("0000000000");
+            admin.setDireccion("Sin dirección");
+            admin.setCiudad("Ciudad por definir");
             admin.setPassword(passwordEncoder.encode("Admin123*"));
             admin.setRol(rolAdmin);
             usuarioRepository.save(admin);
