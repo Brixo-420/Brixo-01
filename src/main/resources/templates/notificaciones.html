@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/design-system.css}">
     <link rel="stylesheet" th:href="@{/css/brixo.css}">
     <style>
@@ -20,71 +21,371 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #0f172a;
-            --muted: #64748b;
-            --border: #e2e8f0;
+            --sidebar-bg: #0f172a;
+            --sidebar-bg-hover: #1e293b;
+            --content-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
         }
-        * { box-sizing: border-box; }
-        html, body { margin:0; padding:0; font-family:"Plus Jakarta Sans",sans-serif; background:var(--bg); color:var(--text); }
-        .page-wrap { max-width:800px; margin:0 auto; padding:90px 1.5rem 3rem; }
 
-        .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem; }
-        .page-header h1 { font-size:1.6rem; font-weight:800; margin:0; display:flex; align-items:center; gap:.6rem; }
-        .page-header h1 i { color:var(--primary); }
+        * {
+            box-sizing: border-box;
+        }
 
-        .btn-bx { border:none; border-radius:10px; padding:.6rem 1.1rem; font-weight:700; cursor:pointer; text-decoration:none; font-size:.88rem; transition:all .25s; display:inline-flex; align-items:center; gap:.4rem; }
-        .btn-bx:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,.12); }
-        .btn-bx-primary { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; }
-        .btn-bx-outline { background:transparent; border:1.5px solid var(--border); color:var(--text); }
-        .btn-bx-outline:hover { border-color:var(--primary); color:var(--primary); }
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Plus Jakarta Sans", sans-serif;
+            background: var(--content-bg);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
 
-        .notif-list { display:flex; flex-direction:column; gap:.6rem; }
-        .notif-item { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1rem 1.2rem; display:flex; align-items:flex-start; gap:.8rem; transition:all .2s; text-decoration:none; color:inherit; }
-        .notif-item:hover { border-color:var(--primary); box-shadow:0 2px 10px rgba(14,165,233,.08); }
-        .notif-item.no-leida { border-left:3px solid var(--primary); background:rgba(14,165,233,.03); }
-        .notif-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,rgba(14,165,233,.1),rgba(99,102,241,.1)); color:var(--primary); flex-shrink:0; }
-        .notif-body { flex:1; }
-        .notif-msg { font-size:.92rem; font-weight:600; line-height:1.4; }
-        .notif-date { font-size:.78rem; color:var(--muted); margin-top:.2rem; }
+        .layout {
+            min-height: 100vh;
+            position: relative;
+        }
 
-        .empty-state { text-align:center; padding:3rem 1rem; color:var(--muted); }
-        .empty-state i { font-size:3rem; margin-bottom:1rem; opacity:.4; }
-        .empty-state p { font-size:1.05rem; font-weight:600; }
+        /* NUEVO: Zona reactiva en el borde de la pantalla */
+        .sidebar-hover-zone {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: 25px;
+            z-index: 99;
+            background: transparent;
+        }
+
+        /* SIDEBAR (Modificado con transiciones y ocultado por defecto) */
+        .sidebar {
+            background: linear-gradient(135deg, var(--sidebar-bg) 0%, #1a1f3a 100%);
+            color: #fff;
+            padding: 1.8rem 1.2rem;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 260px;
+            overflow-y: auto;
+            box-shadow: 8px 0 16px rgba(15, 23, 42, 0.15);
+            z-index: 100;
+            transform: translateX(-240px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Despliegue con Hover en la zona o en sí mismo */
+        .sidebar:hover, 
+        .sidebar-hover-zone:hover + .sidebar {
+            transform: translateX(0);
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+            padding: 0.6rem 1rem;
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 12px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .menu a {
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 0.85rem 1.1rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            border-left: 3px solid transparent;
+        }
+
+        .menu a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .menu a:hover,
+        .menu a.active {
+            background: var(--sidebar-bg-hover);
+            color: #fff;
+            border-left-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        /* CONTENT LAYOUT SYSTEM (Modificado para acoplarse al efecto) */
+        .content {
+            display: flex;
+            flex-direction: column;
+            margin-left: 20px;
+            min-height: 100vh;
+            width: calc(100% - 20px);
+            transition: margin-left 0.3s ease, width 0.3s ease;
+        }
+
+        /* Desplazamiento del contenido al abrir la barra */
+        .sidebar:hover ~ .content {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+        }
+
+        .topbar {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+        }
+
+        .topbar h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .main {
+            padding: 2rem;
+            flex: 1;
+        }
+
+        .btn-bx {
+            border: none;
+            border-radius: 10px;
+            padding: .6rem 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: .88rem;
+            transition: all .25s;
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .btn-bx:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, .12);
+        }
+
+        .btn-bx-outline {
+            background: transparent;
+            border: 1.5px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .btn-bx-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .notif-list {
+            display: flex;
+            flex-direction: column;
+            gap: .6rem;
+        }
+
+        .notif-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: .8rem;
+            transition: all .2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .notif-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 10px rgba(14, 165, 233, .08);
+        }
+
+        .notif-item.no-leida {
+            border-left: 3px solid var(--primary);
+            background: rgba(14, 165, 233, .03);
+        }
+
+        .notif-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(14, 165, 233, .1), rgba(99, 102, 241, .1));
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .notif-body {
+            flex: 1;
+        }
+
+        .notif-msg {
+            font-size: .92rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .notif-date {
+            font-size: .78rem;
+            color: var(--text-muted);
+            margin-top: .2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: .4;
+        }
+
+        .empty-state p {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        /* RESPONSIVE CONTROLADO */
+        @media (max-width: 1024px) {
+            .sidebar-hover-zone {
+                display: none;
+            }
+            .sidebar {
+                position: static;
+                width: 100%;
+                padding: 0.8rem;
+                transform: none;
+                box-shadow: none;
+            }
+            .sidebar:hover {
+                transform: none;
+            }
+            .content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .sidebar:hover ~ .content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .topbar {
+                flex-direction: column;
+                gap: 0.8rem;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .main {
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
+
 <body>
-<div th:replace="~{fragments/navbar :: navbar(overlay=false)}"></div>
+    <div class="layout">
+        <div class="sidebar-hover-zone"></div>
 
-<div class="page-wrap">
-    <div class="page-header">
-        <h1><i class="fas fa-bell"></i> Notificaciones</h1>
-        <form th:if="${!#lists.isEmpty(notificaciones)}" th:action="@{/notificaciones/marcar-todas}" method="post">
-            <button type="submit" class="btn-bx btn-bx-outline"><i class="fas fa-check-double"></i> Marcar todas como leídas</button>
-        </form>
+        <aside class="sidebar">
+            <a th:href="@{/}" style="text-decoration:none;color:inherit">
+                <div class="logo">BRIXO</div>
+            </a>
+
+            <nav class="menu">
+                <a th:href="@{/dashboard}">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                <a th:href="@{/servicios}">
+                    <i class="fas fa-briefcase"></i> Servicios
+                </a>
+                <a class="active" th:href="@{/notificaciones}">
+                    <i class="fas fa-bell"></i> Notificaciones
+                </a>
+                <a sec:authorize="hasRole('ROLE_CLIENTE')" th:href="@{/servicios/nuevo}">
+                    <i class="fas fa-plus-circle"></i> Publicar tarea
+                </a>
+
+                <a class="btn-regresar" href="javascript:history.back()">
+                    <i class="fas fa-arrow-left"></i> Regresar
+                </a>
+
+                <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/admin/usuarios}">
+                    <i class="fas fa-users-cog"></i> Gestionar usuarios
+                </a>
+                <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/admin/solicitudes}">
+                    <i class="fas fa-user-tie"></i> Solicitudes
+                </a>
+            </nav>
+        </aside>
+
+        <section class="content">
+            <header class="topbar">
+                <h1><i class="fas fa-bell"></i> Notificaciones</h1>
+                <form th:if="${!#lists.isEmpty(notificaciones)}" th:action="@{/notificaciones/marcar-todas}"
+                    method="post">
+                    <button type="submit" class="btn-bx btn-bx-outline">
+                        <i class="fas fa-check-double"></i> Marcar todas como leídas
+                    </button>
+                </form>
+            </header>
+
+            <main class="main">
+                <div class="notif-list" th:if="${!#lists.isEmpty(notificaciones)}">
+                    <a th:each="n : ${notificaciones}" th:href="${n.url != null ? n.url : '#'}" class="notif-item"
+                        th:classappend="${!n.leida} ? 'no-leida' : ''">
+                        <div class="notif-icon"><i class="fas fa-bell"></i></div>
+                        <div class="notif-body">
+                            <div class="notif-msg" th:text="${n.mensaje}"></div>
+                            <div class="notif-date" th:text="${#temporals.format(n.fechaCreacion, 'dd/MM/yyyy HH:mm')}">
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div th:if="${#lists.isEmpty(notificaciones)}" class="empty-state">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>No tienes notificaciones</p>
+                </div>
+            </main>
+        </section>
     </div>
 
-    <div class="notif-list" th:if="${!#lists.isEmpty(notificaciones)}">
-        <a th:each="n : ${notificaciones}"
-           th:href="${n.url != null ? n.url : '#'}"
-           class="notif-item"
-           th:classappend="${!n.leida} ? 'no-leida' : ''">
-            <div class="notif-icon"><i class="fas fa-bell"></i></div>
-            <div class="notif-body">
-                <div class="notif-msg" th:text="${n.mensaje}"></div>
-                <div class="notif-date" th:text="${#temporals.format(n.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></div>
-            </div>
-        </a>
-    </div>
-
-    <div th:if="${#lists.isEmpty(notificaciones)}" class="empty-state">
-        <i class="fas fa-bell-slash"></i>
-        <p>No tienes notificaciones</p>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<div th:replace="~{fragments/navbar :: navbarJs}"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div th:replace="~{fragments/navbar :: navbarJs}"></div>
 </body>
+
 </html>
