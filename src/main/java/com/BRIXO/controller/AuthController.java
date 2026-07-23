@@ -1,11 +1,11 @@
 package com.BRIXO.controller;
 
 import com.BRIXO.model.Usuario;
-import com.BRIXO.service.LoginAttemptService;
 import com.BRIXO.service.UsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,20 +18,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AuthController {
 
     private final UsuarioService usuarioService;
-    private final LoginAttemptService loginAttemptService;
 
-    public AuthController(UsuarioService usuarioService, LoginAttemptService loginAttemptService) {
+    public AuthController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
-        this.loginAttemptService = loginAttemptService;
     }
 
     @GetMapping("/login")
     public String login(HttpServletRequest request, Model model) {
         HttpSession session = request.getSession(false);
         if (session != null) {
-            // Spring Security guarda la excepción con esta clave
             Object ex = session.getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
-            if (ex instanceof org.springframework.security.authentication.LockedException locked) {
+            if (ex instanceof LockedException locked) {
                 model.addAttribute("bloqueado", true);
                 model.addAttribute("mensajeBloqueo", locked.getMessage());
             }
@@ -49,7 +46,7 @@ public class AuthController {
     public String registrar(
             @Valid @ModelAttribute("usuario") Usuario usuario,
             BindingResult bindingResult,
-            RedirectAttributes redirectAttributes,
+            RedirectAttributes ra,
             Model model
     ) {
         if (bindingResult.hasErrors()) {
@@ -57,7 +54,7 @@ public class AuthController {
         }
         try {
             usuarioService.registrar(usuario);
-            redirectAttributes.addFlashAttribute("registroExitoso", "Cuenta creada exitosamente. Inicia sesión.");
+            ra.addFlashAttribute("registroExitoso", "¡Cuenta creada! Ya puedes iniciar sesión.");
             return "redirect:/login";
         } catch (IllegalArgumentException ex) {
             model.addAttribute("error", ex.getMessage());

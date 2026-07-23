@@ -49,13 +49,14 @@ public class HomeController {
 
             model.addAttribute("notificacionesNoLeidas", notificacionService.contarNoLeidas(email));
 
-            Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
-            if (usuario != null) {
-                model.addAttribute("contratistaAprobado", usuario.isContratistaAprobado());
-            }
-
             if (esCliente) {
                 model.addAttribute("solicitudPendiente", solicitudService.tieneSolicitudPendiente(email));
+                com.BRIXO.model.SolicitudContratista ultima = solicitudService.obtenerUltimaSolicitud(email);
+                if (ultima != null && ultima.getEstado() == com.BRIXO.model.SolicitudContratista.Estado.RECHAZADA) {
+                    model.addAttribute("solicitudRechazada", true);
+                    model.addAttribute("motivoRechazo", ultima.getMotivoRechazo());
+                    model.addAttribute("areaRechazo", ultima.getAreaEspecialidad());
+                }
             }
             if (esAdmin) {
                 model.addAttribute("solicitudesPendientes", solicitudService.contarPendientes());

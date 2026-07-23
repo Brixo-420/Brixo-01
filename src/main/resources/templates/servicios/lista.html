@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/design-system.css}">
     <link rel="stylesheet" th:href="@{/css/brixo.css}">
+    <th:block th:replace="~{fragments/sidebar :: sidebarCss}"></th:block>
     <style>
         :root {
             --primary: #0ea5e9;
@@ -20,8 +21,6 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --sidebar-bg: #0f172a;
-            --sidebar-bg-hover: #1e293b;
             --bg: #f8fafc;
             --card: #ffffff;
             --text: #0f172a;
@@ -31,67 +30,7 @@
         * { box-sizing: border-box; }
         html, body { margin:0; padding:0; font-family:"Plus Jakarta Sans",sans-serif; background:var(--bg); color:var(--text); }
 
-        /* ARQUITECTURA BASE DEL LAYOUT CON SIDEBAR */
-        .layout { min-height: 100vh; display: flex; position: relative; overflow-x: hidden; }
-
-        /* SIDEBAR DESPLEGABLE POR HOVER */
-        .sidebar {
-            background: linear-gradient(135deg, var(--sidebar-bg) 0%, #1a1f3a 100%);
-            color: #fff;
-            padding: 1.8rem 1.2rem;
-            position: fixed;
-            left: 0; top: 0; bottom: 0;
-            width: 260px;
-            overflow-y: auto;
-            box-shadow: 8px 0 16px rgba(15, 23, 42, 0.15);
-            z-index: 1000;
-            
-            /* Estado oculto inicial: deja 10px visibles para detectar el mouse */
-            transform: translateX(-250px);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        /* Al acercar el cursor a la izquierda, se despliega por completo */
-        .sidebar:hover {
-            transform: translateX(0);
-        }
-
-        .logo {
-            font-size: 1.4rem; font-weight: 800; letter-spacing: 2px;
-            margin-bottom: 2rem; padding: 0.6rem 1rem; text-align: center; width: 100%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border-radius: 12px;
-        }
-
-        .menu { display: flex; flex-direction: column; gap: 0.6rem; }
-
-        .menu a, .menu .btn-regresar {
-            color: #cbd5e1; text-decoration: none;
-            padding: 0.85rem 1.1rem; border-radius: 10px;
-            font-weight: 600; font-size: 0.95rem;
-            transition: all 0.3s ease; display: flex; align-items: center; gap: 0.7rem;
-            border-left: 3px solid transparent;
-        }
-
-        .menu a i, .menu .btn-regresar i { width: 20px; text-align: center; }
-
-        .menu a:hover, .menu a.active, .menu .btn-regresar:hover {
-            background: var(--sidebar-bg-hover); color: #fff;
-            border-left-color: var(--primary); transform: translateX(4px);
-        }
-
-        /* CONTENEDOR DE CONTENIDO DERECHO RE-AJUSTADO */
-        .content {
-            display: flex; flex-direction: column;
-            margin-left: 0; min-height: 100vh;
-            width: 100%;
-            /* Pequeño espacio de seguridad para no chocar visualmente con la zona activa del menú */
-            padding-left: 15px; 
-            transition: padding-left 0.4s ease;
-        }
-
-        /* Ajuste del contenedor principal */
-        .page-wrap { max-width:1280px; width: 100%; margin:0 auto; padding: 2rem 1.5rem 3rem; }
+        .page-wrap { max-width:1280px; margin:0 auto; padding:90px 1.5rem 3rem; }
 
         /* Header */
         .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem; }
@@ -175,12 +114,6 @@
         .empty-state i { font-size:3rem; margin-bottom:1rem; opacity:.4; }
         .empty-state p { font-size:1.05rem; font-weight:600; }
 
-        @media (max-width:1024px) {
-            .sidebar { transform: translateX(-260px); }
-            .sidebar:hover { transform: translateX(0); }
-            .content { padding-left: 0; }
-        }
-
         @media (max-width:900px) {
             .services-grid { grid-template-columns:1fr; }
             .filter-bar, .filter-bar.has-email { grid-template-columns:1fr; }
@@ -189,164 +122,158 @@
     </style>
 </head>
 <body>
+<th:block th:replace="~{fragments/bg-icons :: bg-icons}"></th:block>
+<div class="dash-layout" style="position:relative;z-index:1">
+    <th:block th:replace="~{fragments/sidebar :: sidebar('servicios')}"></th:block>
 
-<div class="layout">
-    <aside class="sidebar">
-        <a th:href="@{/}" style="text-decoration:none;color:inherit">
-            <div class="logo">BRIXO</div>
-        </a>
-        <nav class="menu">
-            <a th:href="@{/dashboard}">
-                <i class="fas fa-home"></i> Inicio
-            </a>
-            <a class="active" th:href="@{/servicios}">
-                <i class="fas fa-briefcase"></i> Servicios
-            </a>
-            <a th:href="@{/notificaciones}">
-                <i class="fas fa-bell"></i> Notificaciones
-            </a>
-            <a sec:authorize="hasRole('ROLE_CLIENTE')" th:href="@{/servicios/nuevo}">
-                <i class="fas fa-plus-circle"></i> Publicar tarea
-            </a>
-            
-            <a class="btn-regresar" href="javascript:history.back()">
-                <i class="fas fa-arrow-left"></i> Regresar
-            </a>
-
-            <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/admin/usuarios}">
-                <i class="fas fa-users-cog"></i> Gestionar usuarios
-            </a>
-            <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/admin/solicitudes}">
-                <i class="fas fa-user-tie"></i> Solicitudes
-            </a>
-        </nav>
-    </aside>
-
-    <section class="content">
-        <div class="page-wrap">
-
-            <div class="page-header">
-                <h1><i class="fas fa-briefcase"></i> Servicios</h1>
-                <div class="header-actions">
-                    <a th:if="${esCliente}" th:href="@{/servicios/nuevo}" class="btn-bx btn-bx-primary">
-                        <i class="fas fa-plus"></i> Nuevo servicio
-                    </a>
-                </div>
+    <div class="dash-content">
+        <header class="dash-topbar">
+            <h1><i class="fas fa-tools" style="color:#0ea5e9;margin-right:.5rem"></i> Servicios</h1>
+            <div style="display:flex;gap:.6rem;align-items:center">
+                <a th:if="${esCliente}" th:href="@{/servicios/nuevo}" class="btn-bx btn-bx-primary">
+                    <i class="fas fa-plus"></i> Nuevo servicio
+                </a>
+                <span sec:authentication="name" style="font-weight:600;color:#64748b;font-size:.9rem"></span>
             </div>
+        </header>
 
+        <div class="dash-main">
             <div th:if="${ok}" class="bx-alert bx-alert-ok"><i class="fas fa-check-circle"></i> <span th:text="${ok}"></span></div>
             <div th:if="${error}" class="bx-alert bx-alert-err"><i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span></div>
 
-            <div class="bx-card">
-                <form method="get" th:action="@{/servicios}">
-                    <div class="filter-bar" th:classappend="${esAdmin} ? 'has-email' : ''">
-                        <div>
-                            <label for="titulo">Buscar</label>
-                            <input id="titulo" name="titulo" type="text" th:value="${titulo}" placeholder="Título, cliente o contratista...">
-                        </div>
-                        <div>
-                            <label for="estado">Estado</label>
-                            <select id="estado" name="estado">
-                                <option value="">Todos</option>
-                                <option th:each="e : ${estados}" th:value="${e.name()}" th:text="${e.name()}" th:selected="${estado != null and estado.equals(e.name())}"></option>
-                            </select>
-                        </div>
-                        <div th:if="${esAdmin}">
-                            <label for="emailCliente">Email cliente</label>
-                            <input id="emailCliente" name="emailCliente" type="text" th:value="${emailCliente}" placeholder="email@...">
-                        </div>
-                        <div class="filter-actions">
-                            <button type="submit" class="btn-bx btn-bx-primary"><i class="fas fa-search"></i> Filtrar</button>
-                            <a class="btn-bx btn-bx-outline" th:href="@{/servicios}"><i class="fas fa-times"></i></a>
-                            <button type="button" class="btn-bx btn-bx-outline" title="Exportar Excel" disabled><i class="fas fa-file-excel"></i> Excel</button>
-                        </div>
-                    </div>
-                </form>
+            <!-- Tira decorativa construcción -->
+            <div style="display:flex;gap:.85rem;align-items:center;margin-bottom:1rem;opacity:.13;color:#0ea5e9;font-size:1.4rem;pointer-events:none" aria-hidden="true">
+                <i class="fas fa-hard-hat"></i>
+                <i class="fas fa-hammer"></i>
+                <i class="fas fa-wrench"></i>
+                <i class="fas fa-bolt"></i>
+                <i class="fas fa-tools"></i>
+                <i class="fas fa-paint-roller"></i>
+                <i class="fas fa-faucet"></i>
+                <i class="fas fa-cogs"></i>
             </div>
 
-            <div class="services-grid" th:if="${!#lists.isEmpty(servicios)}">
-                <div class="svc-card" th:each="s : ${servicios}">
-                    <div class="svc-card-top" th:classappend="${#strings.toLowerCase(s.estado.name())}"></div>
-                    <div class="svc-card-body">
-                        <div class="svc-card-header">
-                            <h3 class="svc-card-title" th:text="${s.titulo}"></h3>
-                            <span class="svc-card-id" th:text="'#' + ${s.id}"></span>
-                        </div>
-                        <span class="svc-badge" th:classappend="${#strings.toLowerCase(s.estado.name())}" th:text="${s.estado}"></span>
+    <!-- FILTROS -->
+    <div class="bx-card">
+        <form method="get" th:action="@{/servicios}">
+            <div class="filter-bar" th:classappend="${esAdmin} ? 'has-email' : ''">
+                <div>
+                    <label for="titulo">Buscar</label>
+                    <input id="titulo" name="titulo" type="text" th:value="${titulo}" placeholder="Título, cliente o contratista...">
+                </div>
+                <div>
+                    <label for="estado">Estado</label>
+                    <select id="estado" name="estado">
+                        <option value="">Todos</option>
+                        <option th:each="e : ${estados}" th:value="${e.name()}" th:text="${e.name()}" th:selected="${estado != null and estado.equals(e.name())}"></option>
+                    </select>
+                </div>
+                <div th:if="${esAdmin}">
+                    <label for="emailCliente">Email cliente</label>
+                    <input id="emailCliente" name="emailCliente" type="text" th:value="${emailCliente}" placeholder="email@...">
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn-bx btn-bx-primary"><i class="fas fa-search"></i> Filtrar</button>
+                    <a class="btn-bx btn-bx-outline" th:href="@{/servicios}"><i class="fas fa-times"></i></a>
+                    <button type="button" class="btn-bx btn-bx-outline" title="Exportar Excel" style="color:#10b981;border-color:#10b981" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-                        <div class="svc-meta">
-                            <div class="svc-meta-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <strong th:text="${s.ubicacion}"></strong>
-                            </div>
-                            <div class="svc-meta-item">
-                                <i class="fas fa-dollar-sign"></i>
-                                <strong th:text="'$' + ${#numbers.formatDecimal(s.presupuesto, 1, 'POINT', 2, 'COMMA')}"></strong>
-                            </div>
-                            <div class="svc-meta-item">
-                                <i class="fas fa-calendar"></i>
-                                <span th:text="${#temporals.format(s.fechaCreacion, 'dd/MM/yyyy')}"></span>
-                            </div>
-                            <div class="svc-meta-item">
-                                <i class="fas fa-tag"></i>
-                                <span th:text="${s.tipo != null ? s.tipo.displayName : '-'}"></span>
-                            </div>
-                        </div>
+    <!-- SERVICIOS GRID -->
+    <div class="services-grid" th:if="${!#lists.isEmpty(servicios)}">
+        <div class="svc-card" th:each="s : ${servicios}">
+            <div class="svc-card-top" th:classappend="${#strings.toLowerCase(s.estado.name())}"></div>
+            <div class="svc-card-body">
+                <div class="svc-card-header">
+                    <h3 class="svc-card-title" th:text="${s.titulo}"></h3>
+                    <span class="svc-card-id" th:text="'#' + ${s.id}"></span>
+                </div>
+                <span class="svc-badge" th:classappend="${#strings.toLowerCase(s.estado.name())}" th:text="${s.estado}"></span>
 
-                        <div class="svc-people">
-                            <span><i class="fas fa-user"></i> <span th:text="${s.cliente != null ? s.cliente.nombre : '-'}"></span></span>
-                            <span><i class="fas fa-hard-hat"></i> <span th:text="${s.contratistaAsignado != null ? s.contratistaAsignado.nombre : 'Sin asignar'}"></span></span>
-                        </div>
+                <div class="svc-meta">
+                    <div class="svc-meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <strong th:text="${s.ubicacion}"></strong>
                     </div>
-
-                    <div class="svc-card-actions">
-                        <a class="btn-bx btn-bx-outline btn-bx-sm" th:href="@{/servicios/{id}/detalle(id=${s.id})}">
-                            <i class="fas fa-eye"></i> Ver
-                        </a>
-                        <a th:if="${esContratista and s.estado.name() == 'ABIERTO'}"
-                           class="btn-bx btn-bx-success btn-bx-sm" th:href="@{/servicios/{id}/detalle(id=${s.id})}">
-                            <i class="fas fa-file-invoice-dollar"></i> Cotizar
-                        </a>
-                        <form th:if="${(esContratista or esAdmin) and s.estado.name() == 'EN_COTIZACION' and s.contratistaAsignado != null and (esAdmin or s.contratistaAsignado.email == #authentication.name)}"
-                              th:action="@{/servicios/{id}/iniciar(id=${s.id})}" method="post" class="d-inline">
-                            <button type="submit" class="btn-bx btn-bx-success btn-bx-sm" onclick="return confirm('¿Iniciar trabajo?')"><i class="fas fa-play"></i> Iniciar</button>
-                        </form>
-                        <form th:if="${(esContratista or esAdmin) and s.estado.name() == 'EN_PROCESO' and s.contratistaAsignado != null and (esAdmin or s.contratistaAsignado.email == #authentication.name)}"
-                              th:action="@{/servicios/{id}/finalizar(id=${s.id})}" method="post" class="d-inline">
-                            <button type="submit" class="btn-bx btn-bx-success btn-bx-sm"><i class="fas fa-check"></i> Finalizar</button>
-                        </form>
-                        <a th:if="${esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name and s.contratistaAsignado == null}"
-                           class="btn-bx btn-bx-outline btn-bx-sm" th:href="@{/servicios/{id}/editar(id=${s.id})}">
-                            <i class="fas fa-edit"></i> Editar
-                        </a>
-                        <form th:if="${esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name and s.contratistaAsignado == null}"
-                              th:action="@{/servicios/{id}/eliminar(id=${s.id})}" method="post" class="d-inline">
-                            <button type="submit" class="btn-bx btn-bx-danger btn-bx-sm" onclick="return confirm('¿Eliminar servicio?')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
+                    <div class="svc-meta-item">
+                        <i class="fas fa-dollar-sign"></i>
+                        <strong th:if="${!s.presupuestoNegociable}" th:text="'$' + ${#numbers.formatDecimal(s.presupuesto, 1, 'POINT', 2, 'COMMA')}"></strong>
+                        <strong th:if="${s.presupuestoNegociable}" style="color:#6366f1">A negociar</strong>
                     </div>
+                    <div class="svc-meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span th:text="${#temporals.format(s.fechaCreacion, 'dd/MM/yyyy')}"></span>
+                    </div>
+                    <div class="svc-meta-item">
+                        <i class="fas fa-tag"></i>
+                        <span th:text="${s.tipo != null ? s.tipo.displayName : '-'}"></span>
+                    </div>
+                </div>
+
+                <div class="svc-people">
+                    <span><i class="fas fa-user"></i> <span th:text="${s.cliente != null ? s.cliente.nombre : '-'}"></span></span>
+                    <span><i class="fas fa-hard-hat"></i> <span th:text="${s.contratistaAsignado != null ? s.contratistaAsignado.nombre : 'Sin asignar'}"></span></span>
                 </div>
             </div>
 
-            <div th:if="${#lists.isEmpty(servicios)}" class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <p>No se encontraron servicios</p>
-                <a th:if="${esCliente}" th:href="@{/servicios/nuevo}" class="btn-bx btn-bx-primary" style="margin-top:.5rem">
-                    <i class="fas fa-plus"></i> Crear el primero
+            <div class="svc-card-actions">
+                <a class="btn-bx btn-bx-outline btn-bx-sm" th:href="@{/servicios/{id}/detalle(id=${s.id})}">
+                    <i class="fas fa-eye"></i> Ver
                 </a>
+                <a th:if="${esContratista and s.estado.name() == 'ABIERTO'}"
+                   class="btn-bx btn-bx-success btn-bx-sm" th:href="@{/servicios/{id}/detalle(id=${s.id})}">
+                    <i class="fas fa-file-invoice-dollar"></i> Cotizar
+                </a>
+                <form th:if="${(esContratista or esAdmin) and s.estado.name() == 'EN_COTIZACION' and s.contratistaAsignado != null and (esAdmin or s.contratistaAsignado.email == #authentication.name)}"
+                      th:action="@{/servicios/{id}/iniciar(id=${s.id})}" method="post" class="d-inline">
+                    <button type="submit" class="btn-bx btn-bx-success btn-bx-sm" onclick="return confirm('¿Iniciar trabajo?')"><i class="fas fa-play"></i> Iniciar</button>
+                </form>
+                <form th:if="${(esContratista or esAdmin) and s.estado.name() == 'EN_PROCESO' and s.contratistaAsignado != null and (esAdmin or s.contratistaAsignado.email == #authentication.name)}"
+                      th:action="@{/servicios/{id}/finalizar(id=${s.id})}" method="post" class="d-inline">
+                    <button type="submit" class="btn-bx btn-bx-success btn-bx-sm"><i class="fas fa-check"></i> Finalizar</button>
+                </form>
+                <a th:if="${esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name and s.contratistaAsignado == null}"
+                   class="btn-bx btn-bx-outline btn-bx-sm" th:href="@{/servicios/{id}/editar(id=${s.id})}">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <form th:if="${esCliente and s.estado.name() == 'ABIERTO' and s.cliente != null and s.cliente.email == #authentication.name and s.contratistaAsignado == null}"
+                      th:action="@{/servicios/{id}/eliminar(id=${s.id})}" method="post" class="d-inline">
+                    <button type="submit" class="btn-bx btn-bx-danger btn-bx-sm" onclick="return confirm('¿Eliminar servicio?')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
             </div>
-
         </div>
-    </section>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div th:if="${#lists.isEmpty(servicios)}" class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <p>No se encontraron servicios</p>
+        <a th:if="${esCliente}" th:href="@{/servicios/nuevo}" class="btn-bx btn-bx-primary" style="margin-top:.5rem">
+            <i class="fas fa-plus"></i> Crear el primero
+        </a>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    let pageActive = true;
-    window.addEventListener('focus', () => { pageActive = true; });
-    window.addEventListener('blur', () => { pageActive = false; });
-    setInterval(() => { if (pageActive) location.reload(); }, 30000);
+function exportarExcel() {
+    var params = new URLSearchParams();
+    var titulo = document.getElementById('titulo');
+    var estado = document.getElementById('estado');
+    var emailCliente = document.getElementById('emailCliente');
+
+    if (titulo && titulo.value.trim())        params.append('titulo', titulo.value.trim());
+    if (estado && estado.value)               params.append('estado', estado.value);
+    if (emailCliente && emailCliente.value.trim()) params.append('emailCliente', emailCliente.value.trim());
+
+    var url = '/servicios/reporte.xlsx' + (params.toString() ? '?' + params.toString() : '');
+    window.location.href = url;
+}
 </script>
 </body>
 </html>

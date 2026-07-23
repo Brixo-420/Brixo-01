@@ -42,8 +42,8 @@ public class CotizacionService {
         Servicio servicio = servicioRepository.findById(servicioId)
                 .orElseThrow(() -> new IllegalArgumentException("Servicio no encontrado"));
 
-        if (servicio.getEstado() != EstadoServicio.ABIERTO) {
-            throw new IllegalArgumentException("Solo se puede cotizar servicios en estado ABIERTO");
+        if (servicio.getEstado() != EstadoServicio.ABIERTO && servicio.getEstado() != EstadoServicio.EN_COTIZACION) {
+            throw new IllegalArgumentException("Solo se puede cotizar servicios en estado ABIERTO o EN COTIZACION");
         }
 
         Usuario contratista = usuarioRepository.findByEmail(emailContratista)
@@ -63,6 +63,12 @@ public class CotizacionService {
         cotizacion.setMonto(monto);
         cotizacion.setMensaje(mensaje);
         cotizacionRepository.save(cotizacion);
+
+        // Cambiar estado del servicio a EN_COTIZACION cuando llega la primera oferta
+        if (servicio.getEstado() == EstadoServicio.ABIERTO) {
+            servicio.setEstado(EstadoServicio.EN_COTIZACION);
+            servicioRepository.save(servicio);
+        }
 
         // Notificar al cliente
         String clienteEmail = servicio.getCliente().getEmail();

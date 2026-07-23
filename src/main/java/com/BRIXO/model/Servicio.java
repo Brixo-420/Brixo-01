@@ -59,6 +59,9 @@ public class Servicio {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal presupuesto;
 
+    @Column(name = "presupuesto_negociable", columnDefinition = "TINYINT(1) DEFAULT 0 NOT NULL")
+    private boolean presupuestoNegociable = false;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private EstadoServicio estado = EstadoServicio.ABIERTO;

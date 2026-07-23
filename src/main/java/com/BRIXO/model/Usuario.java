@@ -60,6 +60,9 @@ public class Usuario {
     @JoinColumn(name = "rol_id")
     private Rol rol;
 
-    @Column(name = "contratista_aprobado", nullable = false, columnDefinition = "boolean default false") 
+    @Column(name = "contratista_aprobado", nullable = false, columnDefinition = "boolean default false")
     private boolean contratistaAprobado = false;
+
+    @Column(name = "identidad_verificada", nullable = false, columnDefinition = "boolean default false")
+    private boolean identidadVerificada = false;
 }

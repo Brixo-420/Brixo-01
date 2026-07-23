@@ -1,0 +1,13 @@
+target/
+uploads/
+docs/
+documentos html.zip
+python-service/
+.venv/
+.vscode/
+.mvn/
+mvnw
+mvnw.cmd
+.git/
+.gitignore
+*.md

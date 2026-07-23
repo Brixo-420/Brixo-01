@@ -8,299 +8,446 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/design-system.css}">
-    <link rel="stylesheet" th:href="@{/css/brixo.css}">
+    <th:block th:replace="~{fragments/sidebar :: sidebarCss}"></th:block>
     <style>
         :root {
-            --primary: #0ea5e9;
-            --primary-dark: #0284c7;
-            --secondary: #6366f1;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #0f172a;
-            --muted: #64748b;
-            --border: #e2e8f0;
-            --sidebar-bg: #0f172a;
-            --sidebar-bg-hover: #1e293b;
-        }
-        * { box-sizing: border-box; }
-        html, body { margin:0; padding:0; font-family:"Plus Jakarta Sans",sans-serif; background:var(--bg); color:var(--text); overflow-x: hidden; }
-
-        .layout { display: flex; min-height: 100vh; position: relative; }
-
-        /* NUEVO: Zona reactiva invisible en el borde izquierdo para capturar el hover */
-        .sidebar-hover-zone {
-            position: fixed;
-            left: 0; top: 0; bottom: 0;
-            width: 25px; /* Grosor de la zona activa en el borde de la pantalla */
-            z-index: 99;
-            background: transparent;
+            --primary:#0ea5e9; --primary-d:#0284c7;
+            --secondary:#6366f1;
+            --success:#10b981;
+            --danger:#ef4444;
+            --warning:#f59e0b;
+            --border:#e2e8f0;
+            --muted:#64748b;
+            --text:#0f172a;
+            --bg:#f8fafc;
         }
 
-        /* MODIFICADO: Sidebar colapsado por defecto con transform */
-        .sidebar {
-            background: linear-gradient(135deg, var(--sidebar-bg) 0%, #1a1f3a 100%);
+        /* ── Tarjeta perfil ── */
+        .profile-wrap { max-width: 700px; }
+
+        .profile-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f172a 100%);
+            border-radius: 16px 16px 0 0;
+            padding: 2.5rem 2rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(14,165,233,.25) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .profile-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -40px; left: 30%;
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, rgba(99,102,241,.2) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .profile-avatar {
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 800;
             color: #fff;
-            padding: 1.8rem 1.2rem;
-            position: fixed;
-            left: 0; top: 0; bottom: 0;
-            width: 260px;
-            overflow-y: auto;
-            box-shadow: 8px 0 16px rgba(15, 23, 42, 0.15);
-            z-index: 100;
-            transform: translateX(-240px); /* Oculta el menú dejando un pequeño borde de 20px visible */
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px solid rgba(255,255,255,.2);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+            text-transform: uppercase;
         }
 
-        /* Despliegue del menú al pasar el mouse por encima o por la zona activa */
-        .sidebar:hover, 
-        .sidebar-hover-zone:hover + .sidebar {
-            transform: translateX(0);
+        .profile-info { position: relative; z-index: 1; }
+        .profile-name { font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: .2rem; }
+        .profile-email { font-size: .85rem; color: #94a3b8; margin-bottom: .6rem; }
+        .profile-role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 20px;
+            padding: .22rem .75rem;
+            font-size: .72rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            text-transform: uppercase;
+            letter-spacing: .4px;
         }
 
-        .logo {
-            font-size: 1.4rem; font-weight: 800; letter-spacing: 2px;
-            margin-bottom: 2rem; padding: 0.6rem 1rem; display: inline-block;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border-radius: 12px; text-align: center; width: 100%;
+        .profile-body {
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+            padding: 2rem;
         }
 
-        .menu { display: flex; flex-direction: column; gap: 0.6rem; }
-
-        .menu a {
-            color: #cbd5e1; text-decoration: none; padding: 0.85rem 1.1rem;
-            border-radius: 10px; font-weight: 600; font-size: 0.95rem;
-            transition: all 0.3s ease; display: flex; align-items: center;
-            gap: 0.7rem; border-left: 3px solid transparent;
+        /* ── Sección interna ── */
+        .form-section-title {
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: var(--primary);
+            margin-bottom: 1.1rem;
+            padding-bottom: .6rem;
+            border-bottom: 1.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: .5rem;
         }
 
-        .menu a i { width: 20px; text-align: center; }
+        /* ── Campos ── */
+        .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+        .field-full   { grid-column: 1 / -1; }
 
-        .menu a:hover, .menu a.active {
-            background: var(--sidebar-bg-hover); color: #fff;
-            border-left-color: var(--primary); transform: translateX(4px);
+        .field label {
+            display: block;
+            font-size: .78rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            margin-bottom: .35rem;
         }
+        .field label .req { color: var(--danger); }
 
-        /* MODIFICADO: El contenido ahora ocupa el 100% y tiene un pequeño margen para no pisar el borde visible */
-        .content {
-            display: flex; flex-direction: column;
-            margin-left: 20px; 
-            min-height: 100vh; 
-            width: calc(100% - 20px);
-            transition: margin-left 0.3s ease, width 0.3s ease;
+        .input-wrap { position: relative; }
+        .input-wrap i {
+            position: absolute;
+            left: .85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: .8rem;
+            pointer-events: none;
         }
-
-        /* Opcional: Desplaza ligeramente el contenido a la derecha al desplegar para un efecto premium */
-        .sidebar:hover ~ .content {
-            margin-left: 260px;
-            width: calc(100% - 260px);
+        .input-wrap input {
+            width: 100%;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: .65rem .85rem .65rem 2.3rem;
+            font: 500 .9rem "Plus Jakarta Sans", sans-serif;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
         }
+        .input-wrap input:focus  { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14,165,233,.12); }
+        .input-wrap input.is-valid   { border-color: var(--success); }
+        .input-wrap input.is-invalid { border-color: var(--danger); }
 
-        .page-wrap { max-width:680px; margin:0 auto; padding:40px 1.5rem 3rem; width: 100%; }
+        .field-hint { font-size: .74rem; color: var(--muted); margin-top: .28rem; }
+        .field-err  { font-size: .74rem; color: var(--danger); margin-top: .28rem; display: none; }
+        .field-err.show { display: block; }
 
-        .profile-card { background:var(--card); border-radius:16px; border:1px solid var(--border); box-shadow:0 4px 16px rgba(15,23,42,.06); overflow:hidden; }
-        .profile-header { background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%); padding:2rem; color:#fff; text-align:center; position:relative; overflow:hidden; }
-        .profile-header::after { content:''; position:absolute; top:-50%; right:-15%; width:250px; height:250px; background:rgba(255,255,255,.06); border-radius:50%; }
-        .profile-avatar { width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; margin:0 auto .8rem; font-size:2rem; border:3px solid rgba(255,255,255,.3); position:relative; z-index:1; }
-        .profile-header h1 { font-size:1.3rem; font-weight:800; margin:0; position:relative; z-index:1; }
-        .profile-header p { margin:.2rem 0 0; font-size:.88rem; opacity:.85; position:relative; z-index:1; }
-        .profile-role { display:inline-block; margin-top:.5rem; padding:.25rem .7rem; border-radius:20px; background:rgba(255,255,255,.2); font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.3px; position:relative; z-index:1; }
+        /* ── Barra contraseña ── */
+        .pw-bar { height: 3px; border-radius: 3px; margin-top: .4rem; background: var(--border); transition: background .3s; }
+        .pw-bar.weak { background: var(--danger); }
+        .pw-bar.fair { background: var(--warning); }
+        .pw-bar.good { background: var(--success); }
 
-        .profile-body { padding:2rem; }
-
-        .field { margin-bottom:1.2rem; }
-        .field label { font-size:.82rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:.4rem; display:flex; align-items:center; gap:.3rem; }
-        .field label i { color:var(--primary); font-size:.78rem; }
-        .field label .req { color:var(--danger); }
-        .field input { border:1.5px solid var(--border); border-radius:10px; padding:.65rem .9rem; font:inherit; font-size:.92rem; width:100%; transition:all .2s; background:#fff; }
-        .field input:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(14,165,233,.12); }
-        .field input.is-invalid { border-color:var(--danger); }
-        .field input.is-valid { border-color:var(--success); }
-        .field .hint { font-size:.78rem; color:var(--muted); margin-top:.3rem; }
-        .field .err { font-size:.78rem; color:var(--danger); margin-top:.3rem; display:none; }
-        .field .err.show { display:block; }
-
-        .pw-strength { height:4px; border-radius:4px; margin-top:.4rem; transition:background-color .3s; background:#e2e8f0; }
-        .pw-strength.weak { background:var(--danger); }
-        .pw-strength.fair { background:var(--warning); }
-        .pw-strength.good { background:var(--success); }
-
-        .field-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
-
-        .form-actions { display:flex; gap:.6rem; margin-top:1.5rem; padding-top:1.2rem; border-top:1px solid var(--border); }
-        .btn-bx { border:none; border-radius:10px; padding:.65rem 1.3rem; font-weight:700; cursor:pointer; text-decoration:none; font-size:.9rem; transition:all .25s; display:inline-flex; align-items:center; gap:.4rem; }
-        .btn-bx:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,.12); }
-        .btn-bx-primary { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; }
-        .btn-bx-primary:hover { color:#fff; }
-        .btn-bx-outline { background:transparent; border:1.5px solid var(--border); color:var(--text); }
-        .btn-bx-outline:hover { border-color:var(--primary); color:var(--primary); }
-
-        .bx-alert { border-radius:10px; padding:.7rem 1rem; font-weight:600; font-size:.9rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:.5rem; }
-        .bx-alert-ok { background:rgba(16,185,129,.1); color:#047857; border:1px solid rgba(16,185,129,.2); }
-        .bx-alert-err { background:rgba(239,68,68,.1); color:#b91c1c; border:1px solid rgba(239,68,68,.2); }
-
-        /* Ajustes de adaptabilidad */
-        @media (max-width: 1024px) {
-            .sidebar-hover-zone { display: none; }
-            .sidebar { position: static; width: 100%; padding: 0.8rem; transform: none; box-shadow: none; }
-            .sidebar:hover { transform: none; }
-            .content { margin-left: 0; width: 100%; }
-            .sidebar:hover ~ .content { margin-left: 0; width: 100%; }
-            .page-wrap { padding-top: 2rem; }
+        /* ── Acciones ── */
+        .form-actions {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            margin-top: 1.5rem;
+            padding-top: 1.2rem;
+            border-top: 1.5px solid var(--border);
         }
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
+        .btn-save {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: .65rem 1.5rem;
+            font: 700 .9rem "Plus Jakarta Sans", sans-serif;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            transition: all .2s;
         }
-        @media (max-width:640px) {
-            .field-grid { grid-template-columns:1fr; }
-            .profile-body { padding:1.2rem; }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(14,165,233,.3); }
+
+        .btn-danger {
+            background: transparent;
+            border: 1.5px solid var(--danger);
+            color: var(--danger);
+            border-radius: 10px;
+            padding: .6rem 1.1rem;
+            font: 700 .88rem "Plus Jakarta Sans", sans-serif;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            margin-left: auto;
+            transition: all .2s;
+        }
+        .btn-danger:hover { background: var(--danger); color: #fff; }
+
+        /* ── Alertas ── */
+        .bx-alert { border-radius: 10px; padding: .7rem 1rem; font-weight: 600; font-size: .88rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: .5rem; }
+        .bx-ok  { background: rgba(16,185,129,.08); color: #047857; border: 1.5px solid rgba(16,185,129,.2); }
+        .bx-err { background: rgba(239,68,68,.08);  color: #b91c1c; border: 1.5px solid rgba(239,68,68,.2); }
+
+        /* ── Modal eliminar ── */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(15,23,42,.55);
+            backdrop-filter: blur(4px);
+            align-items: center; justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: #fff;
+            border-radius: 16px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 24px 60px rgba(15,23,42,.2);
+            overflow: hidden;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            padding: 1.5rem 2rem;
+            color: #fff;
+            text-align: center;
+        }
+        .modal-header h2 { margin: .5rem 0 0; font-size: 1.1rem; font-weight: 800; }
+        .modal-header p  { margin: .3rem 0 0; font-size: .83rem; opacity: .88; }
+        .modal-body { padding: 1.5rem 2rem; }
+        .modal-body p { font-size: .87rem; color: var(--muted); margin-bottom: 1rem; }
+        .modal-input {
+            width: 100%;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: .65rem .9rem;
+            font: inherit;
+            font-size: .9rem;
+            margin-bottom: 1rem;
+        }
+        .modal-input:focus { outline: none; border-color: var(--danger); }
+        .modal-actions { display: flex; gap: .6rem; }
+        .btn-delete-confirm {
+            flex: 1;
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: .65rem;
+            font: 700 .9rem "Plus Jakarta Sans", sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem;
+            transition: opacity .2s;
+        }
+        .btn-delete-confirm:disabled { opacity: .45; cursor: not-allowed; }
+        .btn-cancel {
+            flex: 1;
+            background: #f1f5f9;
+            border: 1.5px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            padding: .65rem;
+            font: 700 .9rem "Plus Jakarta Sans", sans-serif;
+            cursor: pointer;
+        }
+        .btn-cancel:hover { background: var(--border); }
+
+        @media (max-width: 640px) {
+            .fields-grid { grid-template-columns: 1fr; }
+            .profile-body { padding: 1.2rem; }
+            .profile-hero { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
-
 <body>
+<th:block th:replace="~{fragments/bg-icons :: bg-icons}"></th:block>
+<div class="dash-layout" style="position:relative;z-index:1">
+    <th:block th:replace="~{fragments/sidebar :: sidebar('perfil')}"></th:block>
 
-<div class="layout">
+    <div class="dash-content">
+        <header class="dash-topbar">
+            <h1 style="margin:0;font-size:1.15rem;font-weight:800">
+                <i class="fas fa-user-circle" style="color:#0ea5e9;margin-right:.5rem"></i>
+                Mi Perfil
+            </h1>
+            <span sec:authentication="name" style="font-weight:600;color:#64748b;font-size:.88rem"></span>
+        </header>
 
-    <div class="sidebar-hover-zone"></div>
+        <div class="dash-main profile-wrap">
 
-    <aside class="sidebar">
-        <a th:href="@{/}" style="text-decoration:none;color:inherit">
-            <div class="logo">BRIXO</div>
-        </a>
+            <div th:if="${ok}"    class="bx-alert bx-ok"><i class="fas fa-check-circle"></i> <span th:text="${ok}"></span></div>
+            <div th:if="${error}" class="bx-alert bx-err"><i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span></div>
 
-        <nav class="menu" style="margin-top: 70px;">
-            <a th:href="@{/dashboard}">
-                <i class="fas fa-home"></i> Inicio
-            </a>
-            <a th:href="@{/servicios}"> 
-                <i class="fas fa-briefcase"></i> Servicios
-            </a>
-            <a th:href="@{/notificaciones}">
-                <i class="fas fa-bell"></i> Notificaciones
-            </a>
-            <a sec:authorize="hasRole('ROLE_CLIENTE')" th:href="@{/servicios/nuevo}">
-                <i class="fas fa-plus-circle"></i> Publicar tarea
-            </a>
-            <a class="btn-regresar" href="javascript:history.back()">
-                <i class="fas fa-arrow-left"></i> Regresar
-            </a>
-            <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/admin/usuarios}">
-                <i class="fas fa-users-cog"></i> Gestionar usuarios
-            </a>
-            <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/admin/solicitudes}">
-                <i class="fas fa-user-tie"></i> Solicitudes
-            </a>
-        </nav>
-    </aside>
-
-    <section class="content">
-        
-        <div th:replace="~{fragments/navbar :: navbar(overlay=false)}"></div>
-
-        <div class="page-wrap">
-
-            <div th:if="${ok}" class="bx-alert bx-alert-ok"><i class="fas fa-check-circle"></i> <span th:text="${ok}"></span></div>
-            <div th:if="${error}" class="bx-alert bx-alert-err"><i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span></div>
-
-            <div class="profile-card">
-                <div class="profile-header">
-                    <div class="profile-avatar"><i class="fas fa-user"></i></div>
-                    <h1 th:text="${usuario.nombre}">Nombre</h1>
-                    <p th:text="${usuario.email}">email@ejemplo.com</p>
-                    <div class="profile-role" th:text="${usuario.rol != null ? usuario.rol.nombre : 'SIN ROL'}">ROL</div>
+            <!-- Hero del perfil -->
+            <div class="profile-hero">
+                <!-- Iconos decorativos construcción -->
+                <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.07">
+                    <i class="fas fa-hard-hat" style="position:absolute;font-size:7rem;top:-15%;right:10%;color:#fff;transform:rotate(-10deg)"></i>
+                    <i class="fas fa-wrench"   style="position:absolute;font-size:4rem;bottom:-20%;right:28%;color:#fff;transform:rotate(20deg)"></i>
                 </div>
-                <div class="profile-body">
-                    <form id="perfilForm" th:action="@{/perfil}" method="post" novalidate>
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-
-                        <div class="field-grid">
-                            <div class="field">
-                                <label for="nombre"><i class="fas fa-user"></i> Nombre <span class="req">*</span></label>
-                                <input id="nombre" name="nombre" type="text" th:value="${usuario.nombre}" required minlength="3" maxlength="100" placeholder="Tu nombre">
-                                <div class="err" id="nombreError">El nombre debe tener entre 3 y 100 caracteres</div>
-                            </div>
-
-                            <div class="field">
-                                <label for="email"><i class="fas fa-envelope"></i> Correo <span class="req">*</span></label>
-                                <input id="email" name="email" type="email" th:value="${usuario.email}" required maxlength="120" placeholder="correo@ejemplo.com">
-                                <div class="err" id="emailError">Ingresa un correo electrónico válido</div>
-                            </div>
-
-                            <div class="field">
-                                <label for="telefono"><i class="fas fa-phone"></i> Teléfono <span class="req">*</span></label>
-                                <input id="telefono" name="telefono" type="tel" th:value="${usuario.telefono}" required maxlength="10" placeholder="Ej: 5512345678">
-                                <div class="hint">10 dígitos numéricos</div>
-                                <div class="err" id="telefonoError">Debe tener exactamente 10 dígitos numéricos</div>
-                            </div>
-
-                            <div class="field">
-                                <label for="ciudad"><i class="fas fa-city"></i> Ciudad <span class="req">*</span></label>
-                                <input id="ciudad" name="ciudad" type="text" th:value="${usuario.ciudad}" required minlength="2" maxlength="100" placeholder="Ej: Ciudad de México">
-                                <div class="err" id="ciudadError">La ciudad debe tener entre 2 y 100 caracteres</div>
-                            </div>
-
-                            <div class="field" style="grid-column:1/-1">
-                                <label for="direccion"><i class="fas fa-map-marker-alt"></i> Dirección <span class="req">*</span></label>
-                                <input id="direccion" name="direccion" type="text" th:value="${usuario.direccion}" required minlength="2" maxlength="200" placeholder="Ej: Calle Principal 123, Col. Centro">
-                                <div class="err" id="direccionError">La dirección debe tener entre 2 y 200 caracteres</div>
-                            </div>
-
-                            <div class="field">
-                                <label for="password"><i class="fas fa-lock"></i> Nueva contraseña</label>
-                                <input id="password" name="password" type="password" minlength="6" maxlength="120" placeholder="Dejar vacío para no cambiar">
-                                <div class="pw-strength" id="pwStrength"></div>
-                                <div class="hint">Déjalo vacío si no quieres cambiarla</div>
-                                <div class="err" id="passwordError">La contraseña debe tener mínimo 6 caracteres</div>
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn-bx btn-bx-primary">
-                                <i class="fas fa-save"></i> Guardar cambios
-                            </button>
-                            <a th:href="@{/dashboard}" class="btn-bx btn-bx-outline">
-                                <i class="fas fa-arrow-left"></i> Volver al panel
-                            </a>
-                            <button type="button" class="btn-bx" style="margin-left:auto;background:transparent;border:1.5px solid var(--danger);color:var(--danger)" onclick="document.getElementById('deleteModal').style.display='flex'">
-                                <i class="fas fa-trash-alt"></i> Eliminar cuenta
-                            </button>
-                        </div>
-                    </form>
+                <div class="profile-avatar"
+                     th:text="${#strings.substring(usuario.nombre, 0, 2)}">??</div>
+                <div class="profile-info">
+                    <div class="profile-name" th:text="${usuario.nombre}">Nombre</div>
+                    <div class="profile-email" th:text="${usuario.email}">email</div>
+                    <span class="profile-role-badge">
+                        <i class="fas fa-shield-alt" style="font-size:.65rem"></i>
+                        <span th:text="${usuario.rol != null ? usuario.rol.nombre : 'SIN ROL'}">ROL</span>
+                    </span>
                 </div>
             </div>
 
-        </div> 
-    </section> 
-</div> 
+            <!-- Cuerpo del formulario -->
+            <div class="profile-body">
+                <form id="perfilForm" th:action="@{/perfil}" method="post" novalidate>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
-<div id="deleteModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem">
-    <div style="background:#fff;border-radius:16px;max-width:420px;width:100%;box-shadow:0 20px 50px rgba(15,23,42,.2);overflow:hidden">
-        <div style="background:linear-gradient(135deg,var(--danger),#dc2626);padding:1.5rem 2rem;color:#fff;text-align:center">
-            <i class="fas fa-exclamation-triangle" style="font-size:2rem;margin-bottom:.5rem"></i>
-            <h2 style="margin:0;font-size:1.2rem;font-weight:800">Eliminar cuenta</h2>
-            <p style="margin:.3rem 0 0;font-size:.85rem;opacity:.9">Esta acción no se puede deshacer</p>
+                    <!-- Información personal -->
+                    <div class="form-section-title">
+                        <i class="fas fa-user"></i> Información personal
+                    </div>
+
+                    <div class="fields-grid" style="margin-bottom:1.5rem">
+                        <div class="field">
+                            <label>Nombre completo <span class="req">*</span></label>
+                            <div class="input-wrap">
+                                <i class="fas fa-user"></i>
+                                <input id="nombre" name="nombre" type="text"
+                                       th:value="${usuario.nombre}"
+                                       required minlength="3" maxlength="100"
+                                       placeholder="Tu nombre completo">
+                            </div>
+                            <div class="field-err" id="nombreError">Mínimo 3 caracteres</div>
+                        </div>
+
+                        <div class="field">
+                            <label>Correo electrónico <span class="req">*</span></label>
+                            <div class="input-wrap">
+                                <i class="fas fa-envelope"></i>
+                                <input id="email" name="email" type="email"
+                                       th:value="${usuario.email}"
+                                       required maxlength="120"
+                                       placeholder="correo@ejemplo.com">
+                            </div>
+                            <div class="field-err" id="emailError">Correo electrónico inválido</div>
+                        </div>
+
+                        <div class="field">
+                            <label>Teléfono <span class="req">*</span></label>
+                            <div class="input-wrap">
+                                <i class="fas fa-mobile-alt"></i>
+                                <input id="telefono" name="telefono" type="tel"
+                                       th:value="${usuario.telefono}"
+                                       required maxlength="10" inputmode="numeric"
+                                       placeholder="3001234567">
+                            </div>
+                            <div class="field-hint">Exactamente 10 dígitos numéricos</div>
+                            <div class="field-err" id="telefonoError">Debe tener 10 dígitos</div>
+                        </div>
+
+                        <div class="field">
+                            <label>Ciudad <span class="req">*</span></label>
+                            <div class="input-wrap">
+                                <i class="fas fa-city"></i>
+                                <input id="ciudad" name="ciudad" type="text"
+                                       th:value="${usuario.ciudad}"
+                                       required minlength="2" maxlength="100"
+                                       placeholder="Ej: Bogotá">
+                            </div>
+                            <div class="field-err" id="ciudadError">Ingresa una ciudad válida</div>
+                        </div>
+
+                        <div class="field field-full">
+                            <label>Dirección <span class="req">*</span></label>
+                            <div class="input-wrap">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <input id="direccion" name="direccion" type="text"
+                                       th:value="${usuario.direccion}"
+                                       required minlength="2" maxlength="200"
+                                       placeholder="Ej: Cra 7 # 32-15, Barrio Centro">
+                            </div>
+                            <div class="field-err" id="direccionError">Mínimo 2 caracteres</div>
+                        </div>
+                    </div>
+
+                    <!-- Seguridad -->
+                    <div class="form-section-title">
+                        <i class="fas fa-lock"></i> Cambiar contraseña
+                    </div>
+
+                    <div class="fields-grid" style="margin-bottom:0">
+                        <div class="field field-full">
+                            <label>Nueva contraseña</label>
+                            <div class="input-wrap">
+                                <i class="fas fa-lock"></i>
+                                <input id="password" name="password" type="password"
+                                       minlength="6" maxlength="120"
+                                       placeholder="Deja vacío para no cambiarla">
+                            </div>
+                            <div class="pw-bar" id="pwBar"></div>
+                            <div class="field-hint">Mínimo 6 caracteres. Déjalo vacío si no quieres cambiarla.</div>
+                            <div class="field-err" id="passwordError">Mínimo 6 caracteres</div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Guardar cambios
+                        </button>
+                        <button type="button" class="btn-danger"
+                                onclick="document.getElementById('deleteModal').classList.add('open')">
+                            <i class="fas fa-trash-alt"></i> Eliminar cuenta
+                        </button>
+                    </div>
+                </form>
+            </div>
+
         </div>
-        <div style="padding:1.5rem 2rem">
-            <p style="font-size:.9rem;color:var(--muted);margin:0 0 1rem">Para confirmar, ingresa tu contraseña actual:</p>
+    </div>
+</div>
+
+<!-- Modal eliminar cuenta -->
+<div id="deleteModal" class="modal-overlay"
+     onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-box">
+        <div class="modal-header">
+            <i class="fas fa-shield-alt" style="font-size:1.8rem"></i>
+            <h2>Eliminar cuenta</h2>
+            <p>Esta acción es permanente e irreversible</p>
+        </div>
+        <div class="modal-body">
+            <p>Para confirmar la eliminación de tu cuenta ingresa tu contraseña actual:</p>
             <form id="deleteForm" th:action="@{/perfil/eliminar}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <div class="field" style="margin-bottom:1rem">
-                    <input id="passwordConfirm" name="passwordConfirm" type="password" required minlength="6"
-                           placeholder="Tu contraseña actual"
-                           style="border:1.5px solid var(--border);border-radius:10px;padding:.65rem .9rem;font:inherit;font-size:.92rem;width:100%">
-                    <div class="err" id="deletePassError" style="font-size:.78rem;color:var(--danger);margin-top:.3rem;display:none">Debes ingresar tu contraseña</div>
-                </div>
-                <div style="display:flex;gap:.6rem">
-                    <button type="submit" class="btn-bx" id="deleteBtn" style="flex:1;background:var(--danger);color:#fff;justify-content:center;opacity:.5;cursor:not-allowed" disabled>
+                <input id="deletePass" name="passwordConfirm" type="password"
+                       class="modal-input" placeholder="Contraseña actual" required minlength="6">
+                <div class="modal-actions">
+                    <button type="submit" id="deleteBtn" class="btn-delete-confirm" disabled>
                         <i class="fas fa-trash-alt"></i> Eliminar mi cuenta
                     </button>
-                    <button type="button" class="btn-bx btn-bx-outline" style="flex:1;justify-content:center" onclick="document.getElementById('deleteModal').style.display='none'">
+                    <button type="button" class="btn-cancel"
+                            onclick="document.getElementById('deleteModal').classList.remove('open')">
                         Cancelar
                     </button>
                 </div>
@@ -310,101 +457,77 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<div th:replace="~{fragments/navbar :: navbarJs}"></div>
-
 <script>
-(function() {
-    const delPass = document.getElementById('passwordConfirm');
-    const delBtn = document.getElementById('deleteBtn');
-    const delErr = document.getElementById('deletePassError');
-    if (delPass && delBtn) {
-        delPass.addEventListener('input', function() {
-            const ok = delPass.value.length >= 6;
-            delBtn.disabled = !ok;
-            delBtn.style.opacity = ok ? '1' : '.5';
-            delBtn.style.cursor = ok ? 'pointer' : 'not-allowed';
-            delErr.style.display = (!ok && delPass.value.length > 0) ? 'block' : 'none';
-        });
-        document.getElementById('deleteForm').addEventListener('submit', function(e) {
-            if (delPass.value.length < 6) {
-                e.preventDefault();
-                delErr.style.display = 'block';
-            }
-        });
-    }
-    const modal = document.getElementById('deleteModal');
-    if (modal) modal.addEventListener('click', function(e) { if (e.target === modal) modal.style.display = 'none'; });
-})();
-</script>
-
-<script>
-(function() {
-    const form = document.getElementById('perfilForm');
-    if (!form) return;
-
-    const rules = {
-        nombre:    { test: v => v.length >= 3 && v.length <= 100, msgId: 'nombreError' },
-        email:     { test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), msgId: 'emailError' },
-        telefono:  { test: v => /^[0-9]{10}$/.test(v), msgId: 'telefonoError' },
-        ciudad:    { test: v => v.length >= 2 && v.length <= 100, msgId: 'ciudadError' },
-        direccion: { test: v => v.length >= 2 && v.length <= 200, msgId: 'direccionError' },
-        password:  { test: v => v === '' || v.length >= 6, msgId: 'passwordError', optional: true }
+(function () {
+    var rules = {
+        nombre:    function(v){ return v.trim().length >= 3 && v.trim().length <= 100; },
+        email:     function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); },
+        telefono:  function(v){ return /^[0-9]{10}$/.test(v.trim()); },
+        ciudad:    function(v){ return v.trim().length >= 2 && v.trim().length <= 100; },
+        direccion: function(v){ return v.trim().length >= 2 && v.trim().length <= 200; },
+        password:  function(v){ return v === '' || v.length >= 6; }
     };
 
-    function check(field) {
-        const r = rules[field.id];
-        if (!r) return true;
-        const v = field.id === 'password' ? field.value : field.value.trim();
-        if (r.optional && v === '') {
-            field.classList.remove('is-invalid', 'is-valid');
-            document.getElementById(r.msgId).classList.remove('show');
-            return true;
-        }
-        const ok = r.test(v);
-        field.classList.toggle('is-invalid', !ok && v.length > 0);
-        field.classList.toggle('is-valid', ok && v.length > 0);
-        document.getElementById(r.msgId).classList.toggle('show', !ok && v.length > 0);
-        return ok || v.length === 0;
+    function validate(id) {
+        var el  = document.getElementById(id);
+        var err = document.getElementById(id + 'Error');
+        if (!el || !rules[id]) return true;
+        var v  = id === 'password' ? el.value : el.value.trim();
+        var ok = rules[id](v);
+        var isOpt = id === 'password';
+        el.classList.toggle('is-valid',   !isOpt ? (ok && v.length > 0) : (ok && v.length > 0));
+        el.classList.toggle('is-invalid', !ok && v.length > 0);
+        if (err) err.classList.toggle('show', !ok && v.length > 0);
+        return ok || (isOpt && v.length === 0);
     }
 
-    Object.keys(rules).forEach(id => {
-        const el = document.getElementById(id);
+    Object.keys(rules).forEach(function(id) {
+        var el = document.getElementById(id);
         if (!el) return;
-        el.addEventListener('blur', () => check(el));
-        el.addEventListener('input', () => check(el));
+        el.addEventListener('blur',  function(){ validate(id); });
+        el.addEventListener('input', function(){ validate(id); });
     });
 
-    const pw = document.getElementById('password');
+    // Solo dígitos en teléfono
+    var tel = document.getElementById('telefono');
+    if (tel) tel.addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,10); });
+
+    // Barra de contraseña
+    var pw = document.getElementById('password');
     if (pw) pw.addEventListener('input', function() {
-        const v = pw.value, bar = document.getElementById('pwStrength');
-        if (!bar) return;
-        bar.classList.remove('weak','fair','good');
+        var v = pw.value, bar = document.getElementById('pwBar');
+        bar.className = 'pw-bar';
         if (!v) return;
-        let s = 0;
+        var s = 0;
         if (v.length >= 6) s++;
         if (v.length >= 8) s++;
-        if (/[a-z]/.test(v) && /[A-Z]/.test(v)) s++;
+        if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++;
         if (/[0-9]/.test(v)) s++;
         if (/[^a-zA-Z0-9]/.test(v)) s++;
         bar.classList.add(s <= 2 ? 'weak' : s <= 3 ? 'fair' : 'good');
     });
 
-    form.addEventListener('submit', function(e) {
-        let valid = true;
-        Object.keys(rules).forEach(id => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            const v = el.id === 'password' ? el.value : el.value.trim();
-            if (!rules[id].optional && v === '') {
-                valid = false;
-                el.classList.add('is-invalid');
-                document.getElementById(rules[id].msgId).classList.add('show');
-            } else if (!check(el) && (!rules[id].optional || v !== '')) {
-                valid = false;
-            }
+    // Validación al enviar
+    document.getElementById('perfilForm').addEventListener('submit', function(e) {
+        var ok = true;
+        Object.keys(rules).forEach(function(id) {
+            if (!validate(id)) ok = false;
         });
-        if (!valid) e.preventDefault();
+        if (!ok) {
+            e.preventDefault();
+            var first = document.querySelector('input.is-invalid');
+            if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     });
+
+    // Modal eliminar — habilitar botón con contraseña
+    var delPass = document.getElementById('deletePass');
+    var delBtn  = document.getElementById('deleteBtn');
+    if (delPass && delBtn) {
+        delPass.addEventListener('input', function() {
+            delBtn.disabled = delPass.value.length < 6;
+        });
+    }
 })();
 </script>
 </body>

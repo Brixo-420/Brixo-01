@@ -4,6 +4,7 @@ import com.BRIXO.model.Rol;
 import com.BRIXO.model.Usuario;
 import com.BRIXO.repository.RolRepository;
 import com.BRIXO.repository.UsuarioRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,14 +83,31 @@ public class UsuarioService {
             throw new IllegalArgumentException("La contraseña debe tener minimo 6 caracteres");
         }
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        usuario.setIdentidadVerificada(true);
         Rol rolCliente = rolRepository.findByNombre("CLIENTE")
                 .orElseThrow(() -> new IllegalArgumentException("Rol CLIENTE no encontrado"));
         usuario.setRol(rolCliente);
         return usuarioRepository.save(usuario);
     }
 
+    @Transactional
+    public void marcarIdentidadVerificada(Long id) {
+        Usuario u = buscarPorId(id);
+        u.setIdentidadVerificada(true);
+        usuarioRepository.save(u);
+    }
+
+    @Transactional
     public void eliminar(Long id) {
-        usuarioRepository.deleteById(id);
+        if (!usuarioRepository.existsById(id)) {
+            throw new IllegalArgumentException("Usuario no encontrado");
+        }
+        try {
+            usuarioRepository.deleteById(id);
+            usuarioRepository.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("No se puede eliminar este usuario porque tiene servicios, solicitudes u otros registros asociados");
+        }
     }
 
     @Transactional
