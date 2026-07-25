@@ -3,9 +3,13 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# libglib2.0-0: dependencia nativa que opencv-python-headless no trae en una imagen slim
+# opencv-python-headless igual enlaza contra estas libs nativas en tiempo de carga;
+# sin ellas cv2 importa "bien" pero le faltan símbolos (ej. CascadeClassifier)
 RUN apt-get update && apt-get install -y --no-install-recommends \
       libglib2.0-0 \
+      libgl1 \
+      libsm6 \
+      libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
