@@ -7,11 +7,8 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     envVars:
-      - key: PYTHON_SERVICE_HOST
-        fromService:
-          name: brixo-python-service
-          type: web
-          property: hostport
+      - key: PYTHON_SERVICE_URL
+        sync: false
       - key: SPRING_DATASOURCE_URL
         sync: false
       - key: SPRING_DATASOURCE_USERNAME
