@@ -17,6 +17,7 @@ WORKDIR /app
 
 RUN useradd --system --uid 1001 appuser
 COPY --from=build /app/target/*.jar app.jar
+RUN chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8080
