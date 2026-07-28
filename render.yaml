@@ -15,6 +15,10 @@ services:
         sync: false
       - key: SPRING_DATASOURCE_PASSWORD
         sync: false
+      - key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+        value: org.postgresql.Driver
+      - key: SPRING_JPA_DATABASE_PLATFORM
+        value: org.hibernate.dialect.PostgreSQLDialect
 
   - name: brixo-python-service
     type: web
