@@ -25,3 +25,12 @@ replay_pid*
 
 # Maven build output
 target/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Archivos subidos por usuarios: nunca se versionan.
+# En produccion van a Cloudflare R2 (ver R2FileService); en local son efimeros.
+uploads/
