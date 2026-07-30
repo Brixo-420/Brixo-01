@@ -3,6 +3,7 @@ package com.BRIXO.controller;
 import com.BRIXO.model.Usuario;
 import com.BRIXO.model.ValidacionIdentidad;
 import com.BRIXO.service.IdentityValidationService;
+import com.BRIXO.service.R2FileService;
 import com.BRIXO.service.SolicitudContratistaService;
 import com.BRIXO.service.UsuarioService;
 import jakarta.servlet.http.HttpSession;
