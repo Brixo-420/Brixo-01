@@ -28,16 +28,16 @@ public class SolicitudContratistaController {
     private final SolicitudContratistaService solicitudService;
     private final IdentityValidationService identityService;
     private final UsuarioService usuarioService;
-
-    @Value("${file.upload.path:uploads/identidad}")
-    private String uploadPath;
+    private final R2FileService r2FileService;
 
     public SolicitudContratistaController(SolicitudContratistaService solicitudService,
                                           IdentityValidationService identityService,
-                                          UsuarioService usuarioService) {
+                                          UsuarioService usuarioService,
+                                          R2FileService r2FileService) {
         this.solicitudService = solicitudService;
         this.identityService = identityService;
         this.usuarioService = usuarioService;
+        this.r2FileService = r2FileService;
     }
 
     @PostMapping("/solicitar-contratista")
@@ -147,15 +147,11 @@ public class SolicitudContratistaController {
 
     private String guardarArchivo(MultipartFile file, String prefix) throws IOException {
         if (file == null || file.isEmpty()) return null;
-        Path dir = Paths.get(uploadPath).toAbsolutePath();
-        Files.createDirectories(dir);
-        String ext = "";
         String original = file.getOriginalFilename();
+        String ext = "";
         if (original != null && original.contains("."))
             ext = original.substring(original.lastIndexOf('.'));
-        String filename = UUID.randomUUID() + "_" + prefix + ext;
-        Path dest = dir.resolve(filename);
-        Files.write(dest, file.getBytes());
-        return dest.toString();
+        String filename = prefix + "_" + UUID.randomUUID() + ext;
+        return r2FileService.uploadFile(file.getBytes(), filename);
     }
 }
