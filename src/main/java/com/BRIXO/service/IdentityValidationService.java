@@ -16,12 +16,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 public class IdentityValidationService {
@@ -38,11 +36,12 @@ public class IdentityValidationService {
     @Value("${python.service.url:http://localhost:8001}")
     private String pythonServiceUrl;
 
-    @Value("${file.upload.path:uploads/identidad}")
-    private String uploadPath;
+    private final R2FileService r2FileService;
 
-    public IdentityValidationService(ValidacionIdentidadRepository validacionRepo) {
+    public IdentityValidationService(ValidacionIdentidadRepository validacionRepo,
+                                     R2FileService r2FileService) {
         this.validacionRepo = validacionRepo;
+        this.r2FileService = r2FileService;
     }
 
     @SuppressWarnings("unchecked")
@@ -53,21 +52,15 @@ public class IdentityValidationService {
         byte[] docBytes    = documento.getBytes();
         byte[] selfieBytes = selfie.getBytes();
 
-        Path uploadDir = Paths.get(uploadPath).toAbsolutePath();
-        Files.createDirectories(uploadDir);
-
-        String docName    = UUID.randomUUID() + "_doc"    + extension(documento);
-        String selfieName = UUID.randomUUID() + "_selfie" + extension(selfie);
-
-        Files.write(uploadDir.resolve(docName),    docBytes);
-        Files.write(uploadDir.resolve(selfieName), selfieBytes);
+        String docKey    = r2FileService.upload(docBytes,    documento.getOriginalFilename(), "doc");
+        String selfieKey = r2FileService.upload(selfieBytes, selfie.getOriginalFilename(),    "selfie");
 
         ValidacionIdentidad validacion = validacionRepo.findByUsuarioId(usuario.getId())
                 .orElseGet(ValidacionIdentidad::new);
 
         validacion.setUsuario(usuario);
-        validacion.setDocumentoPath(uploadDir.resolve(docName).toString());
-        validacion.setSelfiePath(uploadDir.resolve(selfieName).toString());
+        validacion.setDocumentoPath(docKey);
+        validacion.setSelfiePath(selfieKey);
         validacion.setFechaValidacion(LocalDateTime.now());
         validacion.setIntentos(validacion.getIntentos() + 1);
 
@@ -110,13 +103,5 @@ public class IdentityValidationService {
         }
 
         return validacionRepo.save(validacion);
-    }
-
-    private String extension(MultipartFile file) {
-        String name = file.getOriginalFilename();
-        if (name != null && name.contains(".")) {
-            return name.substring(name.lastIndexOf('.'));
-        }
-        return ".jpg";
     }
 }

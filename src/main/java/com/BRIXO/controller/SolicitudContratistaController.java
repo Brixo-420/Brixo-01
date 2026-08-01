@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Controller
 public class SolicitudContratistaController {
@@ -144,11 +143,6 @@ public class SolicitudContratistaController {
 
     private String guardarArchivo(MultipartFile file, String prefix) throws IOException {
         if (file == null || file.isEmpty()) return null;
-        String original = file.getOriginalFilename();
-        String ext = "";
-        if (original != null && original.contains("."))
-            ext = original.substring(original.lastIndexOf('.'));
-        String filename = prefix + "_" + UUID.randomUUID() + ext;
-        return r2FileService.uploadFile(file.getBytes(), filename);
+        return r2FileService.upload(file.getBytes(), file.getOriginalFilename(), prefix);
     }
 }

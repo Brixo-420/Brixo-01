@@ -1,6 +1,7 @@
 package com.BRIXO.controller;
 
 import com.BRIXO.model.SolicitudContratista;
+import com.BRIXO.service.R2FileService;
 import com.BRIXO.service.SolicitudContratistaService;
 import com.BRIXO.repository.SolicitudContratistaRepository;
 import org.springframework.http.HttpHeaders;
@@ -27,11 +28,14 @@ public class AdminSolicitudController {
 
     private final SolicitudContratistaService solicitudService;
     private final SolicitudContratistaRepository solicitudRepository;
+    private final R2FileService r2FileService;
 
     public AdminSolicitudController(SolicitudContratistaService solicitudService,
-                                    SolicitudContratistaRepository solicitudRepository) {
+                                    SolicitudContratistaRepository solicitudRepository,
+                                    R2FileService r2FileService) {
         this.solicitudService = solicitudService;
         this.solicitudRepository = solicitudRepository;
+        this.r2FileService = r2FileService;
     }
 
     @GetMapping
@@ -74,10 +78,18 @@ public class AdminSolicitudController {
         if (rutaStr == null || rutaStr.isBlank()) return ResponseEntity.notFound().build();
 
         try {
-            Path ruta = Paths.get(rutaStr);
-            if (!Files.exists(ruta)) return ResponseEntity.notFound().build();
+            byte[] bytes;
+            if (r2FileService.esClaveR2(rutaStr)) {
+                // Archivos migrados: viven en R2 y se sirven leyendolos desde aca
+                // porque el bucket es privado.
+                bytes = r2FileService.download(rutaStr);
+            } else {
+                // Registros anteriores a la migracion: ruta absoluta en disco.
+                Path ruta = Paths.get(rutaStr);
+                if (!Files.exists(ruta)) return ResponseEntity.notFound().build();
+                bytes = Files.readAllBytes(ruta);
+            }
 
-            byte[] bytes = Files.readAllBytes(ruta);
             String lower = rutaStr.toLowerCase();
             MediaType mediaType;
             if (lower.endsWith(".pdf"))  mediaType = MediaType.APPLICATION_PDF;
