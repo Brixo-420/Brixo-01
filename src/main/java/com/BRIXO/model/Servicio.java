@@ -59,7 +59,9 @@ public class Servicio {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal presupuesto;
 
-    @Column(name = "presupuesto_negociable", columnDefinition = "TINYINT(1) DEFAULT 0 NOT NULL")
+    // Sin columnDefinition: TINYINT es exclusivo de MySQL y rompe la creacion
+    // de la tabla en PostgreSQL. Hibernate elige el tipo correcto por dialecto.
+    @Column(name = "presupuesto_negociable", nullable = false)
     private boolean presupuestoNegociable = false;
 
     @Enumerated(EnumType.STRING)
