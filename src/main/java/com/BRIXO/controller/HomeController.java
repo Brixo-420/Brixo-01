@@ -4,7 +4,6 @@ import com.BRIXO.model.Rol;
 import com.BRIXO.model.Usuario;
 import com.BRIXO.repository.RolRepository;
 import com.BRIXO.repository.UsuarioRepository;
-import com.BRIXO.service.NotificacionService;
 import com.BRIXO.service.SolicitudContratistaService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,14 +22,12 @@ import java.util.List;
 public class HomeController {
 
     private final SolicitudContratistaService solicitudService;
-    private final NotificacionService notificacionService;
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
 
-    public HomeController(SolicitudContratistaService solicitudService, NotificacionService notificacionService,
+    public HomeController(SolicitudContratistaService solicitudService,
                           UsuarioRepository usuarioRepository, RolRepository rolRepository) {
         this.solicitudService = solicitudService;
-        this.notificacionService = notificacionService;
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
     }
@@ -47,7 +44,8 @@ public class HomeController {
             boolean esCliente = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_CLIENTE"));
             boolean esAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
 
-            model.addAttribute("notificacionesNoLeidas", notificacionService.contarNoLeidas(email));
+            // El contador de no leidas no se agrega al modelo: ninguna plantilla lo
+            // consume, el badge del navbar lo obtiene por AJAX desde /notificaciones/count.
 
             if (esCliente) {
                 model.addAttribute("solicitudPendiente", solicitudService.tieneSolicitudPendiente(email));

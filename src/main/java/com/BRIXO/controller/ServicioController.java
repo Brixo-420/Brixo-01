@@ -19,13 +19,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
-import org.apache.poi.xssf.usermodel.XSSFDrawing;
-import org.springframework.core.io.ClassPathResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +43,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -53,6 +51,8 @@ import java.util.Arrays;
 @Controller
 @RequestMapping("/servicios")
 public class ServicioController {
+
+    private static final Logger log = LoggerFactory.getLogger(ServicioController.class);
 
     private final ServicioService servicioService;
     private final CotizacionService cotizacionService;
@@ -137,6 +137,14 @@ public class ServicioController {
             model.addAttribute("error", ex.getMessage());
             model.addAttribute("estados", EstadoServicio.values());
             return "servicios/form";
+        } catch (DataAccessException ex) {
+            // Sin esto un fallo de BD escapa del controlador y el usuario recibe
+            // una pagina de error cruda, perdiendo lo que habia escrito.
+            log.error("Error de base de datos al crear el servicio", ex);
+            model.addAttribute("error", "No se pudo guardar el servicio. Intentalo de nuevo; "
+                    + "si el problema persiste, avisa al administrador.");
+            model.addAttribute("estados", EstadoServicio.values());
+            return "servicios/form";
         }
     }
 
@@ -167,14 +175,11 @@ public class ServicioController {
             byte[] cAccento    = {(byte)14,(byte)165,(byte)233};      // #0ea5e9
             byte[] cAccentoBg  = {(byte)224,(byte)242,(byte)254};     // #e0f2fe (azul claro)
             byte[] cGrisClaro  = {(byte)248,(byte)250,(byte)252};     // #f8fafc
-            byte[] cBorde      = {(byte)203,(byte)213,(byte)225};     // #cbd5e1
             byte[] cBordeLight = {(byte)226,(byte)232,(byte)240};     // #e2e8f0
-            byte[] cBlanco     = {(byte)255,(byte)255,(byte)255};
             byte[] cSuccess    = {(byte)16,(byte)185,(byte)129};      // #10b981
             byte[] cSuccessBg  = {(byte)209,(byte)250,(byte)229};     // #d1fae5
             byte[] cWarning    = {(byte)245,(byte)158,(byte)11};      // #f59e0b
             byte[] cWarningBg  = {(byte)254,(byte)243,(byte)199};     // #fef3c7
-            byte[] cDanger     = {(byte)239,(byte)68,(byte)68};       // #ef4444
             byte[] cSecondary  = {(byte)99,(byte)102,(byte)241};      // #6366f1
             byte[] cSecBg      = {(byte)224,(byte)231,(byte)255};     // #e0e7ff
             byte[] cTotalBg    = {(byte)30,(byte)41,(byte)59};        // #1e293b
@@ -612,6 +617,12 @@ public class ServicioController {
             return "redirect:/servicios";
         } catch (IllegalArgumentException ex) {
             model.addAttribute("error", ex.getMessage());
+            model.addAttribute("estados", EstadoServicio.values());
+            return "servicios/form";
+        } catch (DataAccessException ex) {
+            log.error("Error de base de datos al actualizar el servicio {}", id, ex);
+            model.addAttribute("error", "No se pudo actualizar el servicio. Intentalo de nuevo; "
+                    + "si el problema persiste, avisa al administrador.");
             model.addAttribute("estados", EstadoServicio.values());
             return "servicios/form";
         }
