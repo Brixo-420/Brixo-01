@@ -7,16 +7,17 @@ echo   BRIXO - Iniciando todos los servicios
 echo ============================================
 echo.
 
-:: ── 1. Iniciar MySQL via XAMPP ──────────────────────────────
-echo [1/3] Iniciando MySQL...
-set XAMPP_DIR=C:\xampp
-if exist "%XAMPP_DIR%\mysql\bin\mysqld.exe" (
-    start "" "%XAMPP_DIR%\mysql\bin\mysqld.exe" --defaults-file="%XAMPP_DIR%\mysql\bin\my.ini"
-    echo      MySQL iniciado en puerto 3307
-    timeout /t 3 /nobreak >nul
+:: ── 1. Iniciar PostgreSQL via Docker ────────────────────────
+echo [1/3] Iniciando PostgreSQL...
+set "PROJECT_DIR=%~dp0"
+docker compose version >nul 2>&1
+if %errorlevel%==0 (
+    docker compose -f "%PROJECT_DIR%docker-compose.yml" up -d
+    echo      PostgreSQL iniciado en puerto 5432
+    timeout /t 5 /nobreak >nul
 ) else (
-    echo      XAMPP no encontrado en C:\xampp
-    echo      Asegurate de que MySQL este corriendo manualmente.
+    echo      Docker no esta disponible.
+    echo      Instala Docker Desktop o levanta PostgreSQL manualmente en el 5432.
     pause
 )
 
@@ -41,7 +42,6 @@ echo.
 
 :: ── 3. Iniciar Spring Boot ───────────────────────────────────
 echo [3/3] Iniciando Spring Boot en puerto 8080...
-set "PROJECT_DIR=%~dp0"
 if exist "%PROJECT_DIR%mvnw.cmd" (
     start "Brixo Spring Boot" cmd /k "cd /d ""%PROJECT_DIR%"" && mvnw.cmd spring-boot:run"
     echo      Spring Boot iniciando...
@@ -52,7 +52,7 @@ if exist "%PROJECT_DIR%mvnw.cmd" (
 echo.
 echo ============================================
 echo   Servicios en curso:
-echo   MySQL  : localhost:3307
+echo   Postgres : localhost:5432
 echo   Python : http://localhost:8001
 echo   App    : http://localhost:8080
 echo ============================================

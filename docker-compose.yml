@@ -1,0 +1,27 @@
+# PostgreSQL para desarrollo local: el mismo motor que usa Render, para que
+# un error de SQL salte en tu maquina y no en produccion.
+#
+#   docker compose up -d      arranca la base
+#   docker compose down       la detiene (los datos se conservan)
+#   docker compose down -v    la detiene y borra los datos
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: brixo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: brixo
+      POSTGRES_USER: brixo
+      POSTGRES_PASSWORD: brixo
+    ports:
+      - "5432:5432"
+    volumes:
+      - brixo-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brixo -d brixo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  brixo-pgdata:
