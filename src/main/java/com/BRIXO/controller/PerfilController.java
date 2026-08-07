@@ -1,6 +1,7 @@
 package com.BRIXO.controller;
 
 import com.BRIXO.model.Usuario;
+import com.BRIXO.service.ResenaService;
 import com.BRIXO.service.UsuarioService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,15 +22,18 @@ import jakarta.servlet.http.HttpServletResponse;
 public class PerfilController {
 
     private final UsuarioService usuarioService;
+    private final ResenaService resenaService;
 
-    public PerfilController(UsuarioService usuarioService) {
+    public PerfilController(UsuarioService usuarioService, ResenaService resenaService) {
         this.usuarioService = usuarioService;
+        this.resenaService = resenaService;
     }
 
     @GetMapping
     public String verPerfil(Authentication authentication, Model model) {
         Usuario usuario = usuarioService.buscarPorEmail(authentication.getName());
         model.addAttribute("usuario", usuario);
+        model.addAttribute("resumen", resenaService.resumen(usuario.getId()));
         return "perfil";
     }
 

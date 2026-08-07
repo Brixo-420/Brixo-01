@@ -4,6 +4,7 @@ import com.BRIXO.model.EstadoServicio;
 import com.BRIXO.model.Servicio;
 import com.BRIXO.model.TipoServicio;
 import com.BRIXO.service.CotizacionService;
+import com.BRIXO.service.ResenaService;
 import com.BRIXO.service.ServicioService;
 import jakarta.validation.Valid;
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -54,10 +55,13 @@ public class ServicioController {
 
     private final ServicioService servicioService;
     private final CotizacionService cotizacionService;
+    private final ResenaService resenaService;
 
-    public ServicioController(ServicioService servicioService, CotizacionService cotizacionService) {
+    public ServicioController(ServicioService servicioService, CotizacionService cotizacionService,
+                              ResenaService resenaService) {
         this.servicioService = servicioService;
         this.cotizacionService = cotizacionService;
+        this.resenaService = resenaService;
     }
 
     @GetMapping
@@ -565,6 +569,19 @@ public class ServicioController {
             model.addAttribute("esContratistaAsignado", esContratistaAsignado);
             model.addAttribute("cotizaciones", cotizaciones);
             model.addAttribute("yaCotizo", yaCotizo);
+
+            // Resenas: solo el cliente dueno y el contratista asignado pueden calificar,
+            // y unicamente cuando el trabajo ya quedo CERRADO.
+            model.addAttribute("resenas", resenaService.listarPorServicio(id));
+            model.addAttribute("miResena", resenaService.buscarMiResena(id, emailActual));
+            model.addAttribute("puedeResenar", resenaService.puedeResenar(servicio, emailActual));
+            model.addAttribute("esParticipante", resenaService.esParticipante(servicio, emailActual));
+            if (servicio.getCliente() != null) {
+                model.addAttribute("resumenCliente", resenaService.resumen(servicio.getCliente().getId()));
+            }
+            if (servicio.getContratistaAsignado() != null) {
+                model.addAttribute("resumenContratista", resenaService.resumen(servicio.getContratistaAsignado().getId()));
+            }
             return "servicios/detalle";
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());

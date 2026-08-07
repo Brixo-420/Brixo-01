@@ -60,6 +60,7 @@
                     <a th:href="@{/dashboard}" class="bn__dropdown-item" role="menuitem"><i class="fas fa-th-large"></i> Mi Panel</a>
                     <a th:href="@{/perfil}" class="bn__dropdown-item" role="menuitem"><i class="fas fa-id-card"></i> Mi Perfil</a>
                     <a th:href="@{/notificaciones}" class="bn__dropdown-item" role="menuitem"><i class="fas fa-bell"></i> Notificaciones</a>
+                    <a th:href="@{/resenas}" class="bn__dropdown-item" role="menuitem"><i class="fas fa-star"></i> Mis Reseñas</a>
                     <!-- Cambiar Rol -->
                     <div th:if="${contratistaAprobado}" class="bn__dropdown-divider"></div>
                     <form th:if="${contratistaAprobado}" th:action="@{/cambiar-rol}" method="post" class="bn__dropdown-form">
@@ -116,6 +117,7 @@
             <div class="bn__mobile-actions">
                 <a th:href="@{/dashboard}" class="bn__dropdown-item"><i class="fas fa-th-large"></i> Mi Panel</a>
                 <a th:href="@{/perfil}" class="bn__dropdown-item"><i class="fas fa-id-card"></i> Mi Perfil</a>
+                <a th:href="@{/resenas}" class="bn__dropdown-item"><i class="fas fa-star"></i> Mis Reseñas</a>
                 <!-- Cambiar Rol (móvil) -->
                 <form th:if="${contratistaAprobado}" th:action="@{/cambiar-rol}" method="post" style="margin:0;padding:8px 16px">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">

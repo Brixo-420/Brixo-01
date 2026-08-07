@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <th:block th:replace="~{fragments/sidebar :: sidebarCss}"></th:block>
+    <th:block th:replace="~{fragments/estrellas :: estrellasCss}"></th:block>
     <style>
         :root {
             --primary:#0ea5e9; --primary-d:#0284c7;
@@ -314,6 +315,13 @@
                         <i class="fas fa-shield-alt" style="font-size:.65rem"></i>
                         <span th:text="${usuario.rol != null ? usuario.rol.nombre : 'SIN ROL'}">ROL</span>
                     </span>
+                    <a th:href="@{/resenas}" title="Ver mis reseñas"
+                       style="display:flex;align-items:center;gap:.4rem;margin-top:.6rem;text-decoration:none;color:#94a3b8;font-size:.8rem">
+                        <span th:replace="~{fragments/estrellas :: estrellas(${resumen.promedio}, '.85rem')}"></span>
+                        <span th:text="${resumen.sinResenas}
+                                ? 'Sin reseñas todavía'
+                                : (${resumen.promedioTexto} + ' de 5 · ' + ${resumen.total} + ' reseña(s)')"></span>
+                    </a>
                 </div>
             </div>
 

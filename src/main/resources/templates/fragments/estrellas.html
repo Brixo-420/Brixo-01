@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- ═══════════ CSS de estrellas — insertar en <head> ═══════════ -->
+<th:block th:fragment="estrellasCss">
+<style>
+    /* Estrellas de solo lectura */
+    .bx-stars { display:inline-flex; gap:1px; color:#f59e0b; line-height:1; }
+    .bx-stars .far { color:#cbd5e1; }
+
+    /* Selector de estrellas (radios sin JS): el DOM va de 5 a 1 y se invierte
+       con row-reverse, asi `input:checked ~ label` pinta las estrellas menores. */
+    .star-input { display:inline-flex; flex-direction:row-reverse; justify-content:flex-end; gap:.25rem; }
+    .star-input input { position:absolute; opacity:0; width:0; height:0; }
+    .star-input label { cursor:pointer; font-size:1.6rem; color:#cbd5e1; line-height:1; transition:color .15s, transform .15s; }
+    .star-input label:hover,
+    .star-input label:hover ~ label,
+    .star-input input:checked ~ label { color:#f59e0b; }
+    .star-input label:hover { transform:scale(1.12); }
+    .star-input input:focus-visible + label { outline:2px solid #0ea5e9; outline-offset:2px; border-radius:4px; }
+
+    /* Barras de distribucion 5★ … 1★ */
+    .rating-bar-row { display:flex; align-items:center; gap:.6rem; font-size:.8rem; color:#64748b; }
+    .rating-bar-row .lbl { width:34px; text-align:right; font-weight:700; white-space:nowrap; }
+    .rating-bar { flex:1; height:8px; border-radius:5px; background:#e2e8f0; overflow:hidden; }
+    .rating-bar > span { display:block; height:100%; border-radius:5px; background:linear-gradient(90deg,#f59e0b,#fbbf24); }
+    .rating-bar-row .qty { width:28px; font-weight:700; color:#0f172a; }
+</style>
+</th:block>
+
+<!-- ═══════════ Estrellas de solo lectura ═══════════
+     th:replace="~{fragments/estrellas :: estrellas(${valor}, '1rem')}" -->
+<span th:fragment="estrellas(valor, tam)" class="bx-stars" th:style="'font-size:' + ${tam}"
+      th:attr="aria-label=${valor} + ' de 5 estrellas'">
+    <i th:each="i : ${#numbers.sequence(1,5)}"
+       th:class="${valor >= i ? 'fas fa-star' : (valor >= i - 0.5 ? 'fas fa-star-half-stroke' : 'far fa-star')}"></i>
+</span>
+
+<!-- ═══════════ Selector de estrellas para formularios ═══════════
+     th:replace="~{fragments/estrellas :: selectorEstrellas('nueva', ${miResena?.calificacion})}" -->
+<div th:fragment="selectorEstrellas(idPrefix, seleccion)" class="star-input" role="radiogroup" aria-label="Calificacion">
+    <th:block th:each="i : ${#numbers.sequence(5,1)}">
+        <input type="radio" name="calificacion" required
+               th:id="${idPrefix} + '-estrella-' + ${i}"
+               th:value="${i}"
+               th:checked="${seleccion != null and seleccion == i}">
+        <label th:for="${idPrefix} + '-estrella-' + ${i}"
+               th:title="${i} + ' de 5'"><i class="fas fa-star"></i></label>
+    </th:block>
+</div>
+
+<!-- ═══════════ Resumen de reputacion (promedio + distribucion) ═══════════
+     th:replace="~{fragments/estrellas :: resumenResenas(${resumen})}" -->
+<div th:fragment="resumenResenas(resumen)" class="rating-summary"
+     style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap">
+    <div style="text-align:center;min-width:110px">
+        <div style="font-size:2.6rem;font-weight:800;line-height:1;color:#0f172a"
+             th:text="${resumen.promedioTexto}">-</div>
+        <div th:replace="~{fragments/estrellas :: estrellas(${resumen.promedio}, '1rem')}"></div>
+        <div style="font-size:.78rem;color:#64748b;margin-top:.3rem"
+             th:text="${resumen.total} + (${resumen.total} == 1 ? ' reseña' : ' reseñas')">0 reseñas</div>
+    </div>
+    <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:.3rem">
+        <div class="rating-bar-row" th:each="e : ${resumen.conteos}">
+            <span class="lbl" th:text="${e.key} + ' ★'">5 ★</span>
+            <span class="rating-bar"><span th:style="'width:' + ${resumen.porcentajes[e.key]} + '%'"></span></span>
+            <span class="qty" th:text="${e.value}">0</span>
+        </div>
+    </div>
+</div>
+
+</html>

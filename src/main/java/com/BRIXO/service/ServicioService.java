@@ -172,6 +172,17 @@ public class ServicioService {
 
         actual.setEstado(EstadoServicio.CERRADO);
         servicioRepository.save(actual);
+
+        // Con el servicio cerrado ya se pueden calificar mutuamente: se invita a ambos.
+        if (actual.getCliente() != null && actual.getContratistaAsignado() != null) {
+            String url = "/servicios/" + actual.getId() + "/detalle";
+            notificacionService.crear(actual.getCliente().getEmail(),
+                    "El trabajo \"" + actual.getTitulo() + "\" finalizo. Califica a "
+                            + actual.getContratistaAsignado().getNombre(), url);
+            notificacionService.crear(actual.getContratistaAsignado().getEmail(),
+                    "Cerraste el trabajo \"" + actual.getTitulo() + "\". Califica a "
+                            + actual.getCliente().getNombre(), url);
+        }
     }
 
     private void validarPermisoPropietario(Servicio servicio, String emailUsuarioActual, boolean esAdmin) {

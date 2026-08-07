@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/design-system.css}">
     <link rel="stylesheet" th:href="@{/css/brixo.css}">
+    <th:block th:replace="~{fragments/estrellas :: estrellasCss}"></th:block>
     <style>
         :root {
             --primary: #0ea5e9;
@@ -102,6 +103,23 @@
         .cot-form-card input, .cot-form-card textarea { border:1.5px solid var(--border); border-radius:9px; padding:.55rem .8rem; font:inherit; font-size:.9rem; width:100%; }
         .cot-form-card input:focus, .cot-form-card textarea:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(14,165,233,.12); }
 
+        /* Reseñas */
+        .res-form-card { background:linear-gradient(135deg,rgba(245,158,11,.05),rgba(251,191,36,.05)); border:2px dashed var(--warning); border-radius:12px; padding:1.2rem; margin-bottom:1rem; }
+        .res-form-card h4 { font-size:.95rem; font-weight:800; margin:0 0 .1rem; }
+        .res-form-card .sub { font-size:.8rem; color:var(--muted); margin-bottom:.8rem; }
+        .res-form-card textarea { border:1.5px solid var(--border); border-radius:9px; padding:.55rem .8rem; font:inherit; font-size:.9rem; width:100%; resize:vertical; min-height:70px; }
+        .res-form-card textarea:focus { outline:none; border-color:var(--warning); box-shadow:0 0 0 3px rgba(245,158,11,.12); }
+        .btn-bx-warning { background:linear-gradient(135deg,var(--warning),#d97706); color:#fff; }
+        .btn-bx-warning:hover { color:#fff; }
+        .res-hint { background:rgba(99,102,241,.06); border:1px solid rgba(99,102,241,.25); border-radius:10px; padding:.8rem 1rem; font-size:.88rem; font-weight:600; color:#4338ca; display:flex; align-items:center; gap:.5rem; margin-bottom:1rem; }
+        .res-card { background:#f8fafc; border:1px solid var(--border); border-radius:12px; padding:1rem 1.2rem; }
+        .res-card .res-head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; }
+        .res-autor { font-weight:700; font-size:.95rem; }
+        .res-flow { font-size:.78rem; color:var(--muted); }
+        .res-msg { font-size:.88rem; line-height:1.6; margin-top:.5rem; color:var(--text); white-space:pre-wrap; }
+        .res-date { font-size:.75rem; color:var(--muted); margin-top:.4rem; }
+        .btn-bx-sm { padding:.35rem .8rem; font-size:.8rem; }
+
         @media (max-width:640px) {
             .info-grid, .people-grid { grid-template-columns:1fr; }
             .detail-hero { padding:1.5rem; }
@@ -170,6 +188,12 @@
                         <div class="person-role">Cliente</div>
                         <div class="person-name" th:text="${servicio.cliente != null ? servicio.cliente.nombre : 'No asignado'}"></div>
                         <div style="font-size:.8rem;color:var(--muted)" th:text="${servicio.cliente != null ? servicio.cliente.email : ''}"></div>
+                        <a th:if="${resumenCliente != null}" th:href="@{/resenas/usuario/{id}(id=${servicio.cliente.id})}"
+                           style="display:flex;align-items:center;gap:.35rem;margin-top:.25rem;text-decoration:none;color:var(--muted);font-size:.76rem"
+                           title="Ver reseñas del cliente">
+                            <span th:replace="~{fragments/estrellas :: estrellas(${resumenCliente.promedio}, '.78rem')}"></span>
+                            <span th:text="${resumenCliente.sinResenas} ? 'Sin reseñas' : (${resumenCliente.promedioTexto} + ' · ' + ${resumenCliente.total})"></span>
+                        </a>
                     </div>
                 </div>
                 <div class="person-card">
@@ -180,6 +204,12 @@
                         <div class="person-role">Contratista</div>
                         <div class="person-name" th:text="${servicio.contratistaAsignado != null ? servicio.contratistaAsignado.nombre : 'Sin asignar'}"></div>
                         <div style="font-size:.8rem;color:var(--muted)" th:text="${servicio.contratistaAsignado != null ? servicio.contratistaAsignado.email : 'Pendiente de asignación'}"></div>
+                        <a th:if="${resumenContratista != null}" th:href="@{/resenas/usuario/{id}(id=${servicio.contratistaAsignado.id})}"
+                           style="display:flex;align-items:center;gap:.35rem;margin-top:.25rem;text-decoration:none;color:var(--muted);font-size:.76rem"
+                           title="Ver reseñas del contratista">
+                            <span th:replace="~{fragments/estrellas :: estrellas(${resumenContratista.promedio}, '.78rem')}"></span>
+                            <span th:text="${resumenContratista.sinResenas} ? 'Sin reseñas' : (${resumenContratista.promedioTexto} + ' · ' + ${resumenContratista.total})"></span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -255,6 +285,101 @@
         <div th:if="${#lists.isEmpty(cotizaciones)}" style="text-align:center;padding:1rem;color:var(--muted);font-size:.9rem">
             <i class="fas fa-inbox" style="font-size:1.5rem;opacity:.4;display:block;margin-bottom:.4rem"></i>
             Aún no hay cotizaciones para este servicio
+        </div>
+    </div>
+
+    <!-- RESEÑAS -->
+    <div class="d-card">
+        <div class="d-card-title"><i class="fas fa-star"></i> Reseñas del trabajo</div>
+
+        <!-- Aún no se puede calificar: el servicio no ha terminado -->
+        <div th:if="${esParticipante and servicio.estado.name() != 'CERRADO'}" class="res-hint">
+            <i class="fas fa-lock"></i>
+            Podrás calificar a la otra parte cuando el trabajo quede finalizado.
+        </div>
+
+        <!-- Dejar reseña -->
+        <div th:if="${puedeResenar}" class="res-form-card">
+            <form th:action="@{/servicios/{id}/resenas(id=${servicio.id})}" method="post">
+                <h4>
+                    <i class="fas fa-pen-to-square" style="color:var(--warning)"></i>
+                    Califica a
+                    <span th:text="${esClientePropietario} ? ${servicio.contratistaAsignado.nombre} : ${servicio.cliente.nombre}"></span>
+                </h4>
+                <div class="sub" th:text="${esClientePropietario}
+                        ? 'Cuéntale a otros clientes cómo fue el trabajo de este contratista.'
+                        : 'Cuéntale a otros contratistas cómo fue trabajar con este cliente.'"></div>
+
+                <div th:replace="~{fragments/estrellas :: selectorEstrellas('nueva', null)}"></div>
+
+                <div style="margin-top:.8rem">
+                    <label for="comentario" style="font-size:.82rem;font-weight:700;color:var(--muted);text-transform:uppercase">Comentario (opcional)</label>
+                    <textarea id="comentario" name="comentario" maxlength="500"
+                              placeholder="Puntualidad, calidad, comunicación, limpieza..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-bx btn-bx-warning" style="margin-top:.8rem"
+                        onclick="return confirm('¿Publicar esta reseña?')">
+                    <i class="fas fa-star"></i> Publicar reseña
+                </button>
+            </form>
+        </div>
+
+        <!-- Editar mi reseña -->
+        <details th:if="${miResena != null}" class="res-form-card">
+            <summary style="cursor:pointer;font-weight:700;font-size:.9rem">
+                <i class="fas fa-pen" style="color:var(--warning)"></i> Editar mi reseña
+            </summary>
+            <form th:action="@{/servicios/{sid}/resenas/{rid}/editar(sid=${servicio.id},rid=${miResena.id})}"
+                  method="post" style="margin-top:.9rem">
+                <div th:replace="~{fragments/estrellas :: selectorEstrellas('editar', ${miResena.calificacion})}"></div>
+                <div style="margin-top:.8rem">
+                    <label for="comentarioEdit" style="font-size:.82rem;font-weight:700;color:var(--muted);text-transform:uppercase">Comentario (opcional)</label>
+                    <textarea id="comentarioEdit" name="comentario" maxlength="500" th:text="${miResena.comentario}"></textarea>
+                </div>
+                <button type="submit" class="btn-bx btn-bx-warning" style="margin-top:.8rem">
+                    <i class="fas fa-save"></i> Guardar cambios
+                </button>
+            </form>
+        </details>
+
+        <!-- Lista de reseñas del servicio -->
+        <div th:if="${!#lists.isEmpty(resenas)}" style="display:flex;flex-direction:column;gap:.6rem">
+            <div class="res-card" th:each="r : ${resenas}">
+                <div class="res-head">
+                    <div>
+                        <div class="res-autor" th:text="${r.autor.nombre}"></div>
+                        <div class="res-flow">
+                            <i class="fas fa-arrow-right" style="font-size:.65rem"></i>
+                            <span th:text="'Reseña para ' + ${r.destinatario.nombre}"></span>
+                            <span th:text="${r.tipo.name() == 'CLIENTE_A_CONTRATISTA'} ? '(como cliente)' : '(como contratista)'"></span>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.6rem">
+                        <span th:replace="~{fragments/estrellas :: estrellas(${r.calificacion}, '.95rem')}"></span>
+                        <form sec:authorize="hasRole('ADMIN')"
+                              th:action="@{/servicios/{sid}/resenas/{rid}/eliminar(sid=${servicio.id},rid=${r.id})}"
+                              method="post" style="display:inline">
+                            <button type="submit" class="btn-bx btn-bx-danger btn-bx-sm"
+                                    onclick="return confirm('¿Eliminar esta reseña? Solo hazlo si es contenido inapropiado.')"
+                                    title="Moderar reseña">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div th:if="${r.comentario != null and !r.comentario.isBlank()}" class="res-msg" th:text="${r.comentario}"></div>
+                <div class="res-date">
+                    <i class="fas fa-clock" style="font-size:.68rem"></i>
+                    <span th:text="${#temporals.format(r.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></span>
+                    <span th:if="${r.fechaEdicion != null}"> · editada</span>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(resenas)}" style="text-align:center;padding:1rem;color:var(--muted);font-size:.9rem">
+            <i class="fas fa-star" style="font-size:1.5rem;opacity:.35;display:block;margin-bottom:.4rem"></i>
+            Todavía no hay reseñas de este trabajo
         </div>
     </div>
 
